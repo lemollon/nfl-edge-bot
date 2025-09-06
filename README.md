@@ -1,2 +1,1 @@
-# nfl-edge-bot
-This bot is for NFL Edge Exploitation
+# NFL Edge Coach — see app/ for code
