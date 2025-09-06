@@ -1,14 +1,14 @@
 # app/streamlit_app.py
-import os, re, json, html
+import os, re, html, json
 import streamlit as st
 
-# --- relative imports (this file lives inside app/) ---
-from rag import SimpleRAG                      # BM25 RAG (no FAISS/Torch)
-from feeds import fetch_news                   # team/league RSS (ESPN/NFL + SB Nation)
-from player_news import fetch_player_news      # Google News RSS for players
+# --- local modules (this file lives inside app/) ---
+from rag import SimpleRAG                              # BM25 RAG (no FAISS/Torch)
+from feeds import fetch_news                           # team/league RSS (ESPN/NFL + SB Nation)
+from player_news import fetch_player_news              # Google News RSS for players
 from prompts import SYSTEM_PROMPT, EDGE_INSTRUCTIONS
-from model import LLMBackend                   # HF Inference with open-model fallbacks
-from pdf_export import export_edge_sheet_pdf   # Edge Sheet PDF export
+from model import LLMBackend                           # HF Inference with open-model fallbacks
+from pdf_export import export_edge_sheet_pdf           # Edge Sheet PDF export
 from config import SEASON, is_submission_open
 from state_store import add_plan, add_leaderboard_entry, leaderboard, ladder
 from ownership_scoring import normalize_roster, market_delta_by_position, delta_scalar
@@ -18,24 +18,24 @@ from whatif import score_archetypes
 from narrative_events import surprise_event
 
 # =============================================================================
-# Brand / App config
+# Branding / Page
 # =============================================================================
 st.set_page_config(page_title="GRIT — NFL Edge Coach", page_icon="🏈", layout="wide")
 st.title("🏈 GRIT — Market Value × Narrative Pressure")
 
 # =============================================================================
-# Utilities
+# Helpers
 # =============================================================================
 TAG_RE = re.compile(r"<[^>]+>")
 
 def clean_html(txt: str | None) -> str:
-    """Remove HTML tags/attrs from RSS summaries and unescape entities."""
+    """Strip tags and unescape entities from RSS summaries."""
     if not txt:
         return ""
     return html.unescape(TAG_RE.sub("", txt)).strip()
 
 # =============================================================================
-# RAG + Model (cached)
+# Cached resources
 # =============================================================================
 @st.cache_resource(show_spinner=False)
 def get_rag():
@@ -45,20 +45,27 @@ def get_rag():
 
 @st.cache_resource(show_spinner=False)
 def get_model(backend: str, model_name: str):
-    # backend kept for UI completeness; LLMBackend routes to HF Inference
     return LLMBackend(backend=backend, model_name=model_name)
 
 rag = get_rag()
 
-# -----------------------------------------------------------------------------
-# Sidebar (global controls)
-# -----------------------------------------------------------------------------
+# =============================================================================
+# Sidebar controls
+# =============================================================================
 with st.sidebar:
-    st.subheader("Model & Context")
+    st.subheader("Model & Retrieval")
     backend = st.selectbox("Backend (HF Inference under the hood)", ["hf_inference"], index=0)
     model_name = st.text_input("Model name", value="HuggingFaceH4/zephyr-7b-beta")
-    st.caption("Tip: open models like Zephyr, Qwen2.5-7B-Instruct, Phi-3-mini are ungated.")
-    k_ctx = st.slider("RAG passages (k)", 3, 10, 5)
+    st.caption("Fast, ungated picks: Zephyr-7B, Qwen2.5-7B-Instruct, TinyLlama-1.1B-Chat.")
+
+    # Latency + output controls
+    resp_len = st.select_slider("Response length", options=["Short","Medium","Long"], value="Medium")
+    MAX_TOKENS = {"Short": 256, "Medium": 512, "Long": 800}[resp_len]
+
+    latency_mode = st.selectbox("Latency mode", ["Fast","Balanced","Thorough"], index=1)
+    # RAG passages derived from latency; user can still change below if desired
+    default_k = {"Fast": 3, "Balanced": 5, "Thorough": 8}[latency_mode]
+    k_ctx = st.slider("RAG passages (k)", 3, 10, default_k)
 
     st.divider()
     include_news = st.checkbox("Include headlines", True)
@@ -75,7 +82,7 @@ with st.sidebar:
         st.success("Rebuilt corpus. Reloading…")
         st.rerun()
 
-# Create model after sidebar selections
+# create model after selections
 llm = get_model(backend, model_name)
 
 # =============================================================================
@@ -84,7 +91,7 @@ llm = get_model(backend, model_name)
 tab_coach, tab_game, tab_news = st.tabs(["📋 Coach Mode", "🎮 Game Mode", "📰 Headlines"])
 
 # --------------------------------------------------------------------------------------
-# Coach Mode
+# 📋 Coach Mode
 # --------------------------------------------------------------------------------------
 with tab_coach:
     st.subheader("Edge Sheet Generator")
@@ -95,11 +102,11 @@ with tab_coach:
     )
 
     if st.button("Generate Edge Sheet", key="coach_generate"):
-        # retrieve context
+        # Retrieve context
         ctx = rag.search(coach_q, k=k_ctx)
         ctx_text = "\n\n".join([f"[{i+1}] {c['text']}" for i,(_,c) in enumerate(ctx)])
 
-        # news context
+        # News context
         teams = [t.strip() for t in team_codes.split(",") if t.strip()]
         news_text = ""
         player_news_text = ""
@@ -132,9 +139,13 @@ Player headlines:
 {player_news_text if include_news else 'N/A'}
 """
         try:
-            ans = llm.chat(SYSTEM_PROMPT, user_msg)
+            ans = llm.chat(SYSTEM_PROMPT, user_msg, max_new_tokens=MAX_TOKENS, temperature=0.4)
         except Exception as e:
-            ans = f"**Model error:** {e}\n\nTry a different open model in the sidebar (e.g., HuggingFaceH4/zephyr-7b-beta)."
+            ans = (
+                f"**Model error:** {e}\n\n"
+                "Try a different open model in the sidebar (e.g., HuggingFaceH4/zephyr-7b-beta) "
+                "or switch to a shorter response length."
+            )
 
         st.markdown(ans)
 
@@ -150,7 +161,7 @@ Player headlines:
             except Exception as e:
                 st.caption(f"(PDF export unavailable: {e})")
 
-    # Optional debug: how many passages are loaded
+    # Optional: corpus debug
     with st.expander("Corpus status (debug)"):
         try:
             st.write(f"Loaded passages: {len(rag.chunks)}")
@@ -162,7 +173,7 @@ Player headlines:
             st.caption("Corpus not available.")
 
 # --------------------------------------------------------------------------------------
-# Game Mode
+# 🎮 Game Mode
 # --------------------------------------------------------------------------------------
 with tab_game:
     st.subheader("Weekly Challenge")
@@ -208,7 +219,10 @@ with tab_game:
         "2) 3rd & medium, 11P — WR2 deep cross from stack — attack CB2 leverage\n"
         "3) Red zone — RB screen constraint — vs pressure tendency"
     )
-    rationale = st.text_area("Why this works (market vs pressure)", "WR2 undervalued; CB2 leverage issues; positive sentiment.")
+    rationale = st.text_area(
+        "Why this works (market vs pressure)",
+        "WR2 undervalued; CB2 leverage issues; positive sentiment."
+    )
 
     if st.button("Generate Market/Pressure Summary (LLM)"):
         q = f"Summarize market vs narrative edges for {team_focus} vs {opponent} in one paragraph."
@@ -216,7 +230,7 @@ with tab_game:
         ctx_text = "\n\n".join([c['text'] for _,c in ctx])
         user_msg = "Return JSON only with keys delta_market_hint ([-2..+2]), sentiment_boost ([-2..+2]), reason."
         try:
-            ans = llm.chat("You are a JSON generator.", f"{user_msg}\nContext:\n{ctx_text}")
+            ans = llm.chat("You are a JSON generator.", f"{user_msg}\nContext:\n{ctx_text}", max_new_tokens=MAX_TOKENS, temperature=0.3)
             st.code(ans, language="json")
             st.session_state["_last_summary"] = ans
         except Exception as e:
@@ -278,7 +292,7 @@ with tab_game:
 
     with f1:
         st.markdown("**Opponent AI Coach**")
-        last_user = f"Analyze {team_focus} vs {opponent} edges."  # seed if no chat
+        last_user = f"Analyze {team_focus} vs {opponent} edges."
         ctx = rag.search(last_user, k=5)
         ctx_text_for_ai = "\n\n".join([c['text'] for _, c in ctx])
         if st.button("Generate AI Counter-Plan"):
@@ -313,7 +327,7 @@ with tab_game:
             st.caption(f"(surprise event unavailable: {e})")
 
 # --------------------------------------------------------------------------------------
-# Headlines tab
+# 📰 Headlines tab
 # --------------------------------------------------------------------------------------
 with tab_news:
     st.subheader("Latest Headlines")
