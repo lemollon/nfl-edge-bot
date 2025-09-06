@@ -1,18 +1,17 @@
-import os, streamlit as st
-from dotenv import load_dotenv
-from app.rag import SimpleRAG
-from app.feeds import fetch_news
-from app.player_news import fetch_player_news
-from app.prompts import SYSTEM_PROMPT, EDGE_INSTRUCTIONS
-from app.model import LLMBackend
-from app.pdf_export import export_edge_sheet_pdf
-from app.config import SEASON, is_submission_open
-from app.state_store import add_plan, add_leaderboard_entry, leaderboard, ladder
-from app.ownership_scoring import normalize_roster, market_delta_by_position, delta_scalar
-from app.badges import award_badges
-from app.opponent_ai import generate_ai_plan
-from app.whatif import score_archetypes
-from app.narrative_events import surprise_event
+from rag import SimpleRAG
+from feeds import fetch_news
+from player_news import fetch_player_news
+from prompts import SYSTEM_PROMPT, EDGE_INSTRUCTIONS
+from model import LLMBackend
+from pdf_export import export_edge_sheet_pdf
+from config import SEASON, is_submission_open
+from state_store import add_plan, add_leaderboard_entry, leaderboard, ladder
+from ownership_scoring import normalize_roster, market_delta_by_position, delta_scalar
+from badges import award_badges
+from opponent_ai import generate_ai_plan
+from whatif import score_archetypes
+from narrative_events import surprise_event
+
 
 load_dotenv()
 st.set_page_config(page_title="NFL Edge Coach", page_icon="🏈", layout="wide")
