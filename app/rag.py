@@ -4,8 +4,7 @@ from typing import List, Tuple
 import numpy as np
 from huggingface_hub import InferenceClient
 
-# Set HUGGINGFACE_API_TOKEN in Streamlit Secrets (TOML):
-# HUGGINGFACE_API_TOKEN = "hf_...."
+# Uses HF Inference "feature-extraction" (works on Streamlit Cloud, no torch/faiss)
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
 class SimpleRAG:
@@ -14,7 +13,8 @@ class SimpleRAG:
         token = os.getenv("HUGGINGFACE_API_TOKEN")
         if not token:
             raise RuntimeError("HUGGINGFACE_API_TOKEN not set. Add it in Streamlit Secrets.")
-        self.client = InferenceClient(token=token)
+        # We set the model here so we can call feature_extraction without passing it every time
+        self.client = InferenceClient(model=EMBED_MODEL, token=token)
         self.chunks: List[dict] = []
         self.embs: np.ndarray | None = None
 
@@ -32,8 +32,24 @@ class SimpleRAG:
         return out
 
     def _embed(self, texts: List[str]) -> np.ndarray:
-        res = self.client.embeddings(model=EMBED_MODEL, inputs=texts)
-        vecs = np.array(res["embeddings"], dtype="float32")
+        """
+        Uses HF Inference feature-extraction. For sentence-transformer models,
+        it returns one vector per input. For token-level models, we average tokens.
+        """
+        # HF returns either:
+        # - List[List[float]]  -> one embedding per input (sentence-transformers)
+        # - List[List[List[float]]] -> token embeddings (we average across tokens)
+        out = self.client.feature_extraction(texts)
+        # Ensure list-of-embeddings shape
+        if isinstance(out, list) and len(out) and isinstance(out[0], list):
+            # token-level case: first element is a list of token vectors
+            if len(out) and isinstance(out[0][0], list):
+                vecs = np.array([np.mean(np.asarray(x, dtype="float32"), axis=0) for x in out], dtype="float32")
+            else:
+                vecs = np.asarray(out, dtype="float32")
+        else:
+            vecs = np.asarray(out, dtype="float32")
+        # normalize rows for cosine similarity
         norms = np.linalg.norm(vecs, axis=1, keepdims=True) + 1e-9
         return vecs / norms
 
@@ -48,6 +64,6 @@ class SimpleRAG:
 
     def search(self, query: str, k: int = 5) -> List[Tuple[float, dict]]:
         q = self._embed([query])[0]  # (d,)
-        sims = (self.embs @ q)       # cosine because normalized
+        sims = (self.embs @ q)       # cosine similarity (embeddings are normalized)
         topk = np.argsort(sims)[::-1][:k]
         return [(float(sims[i]), self.chunks[i]) for i in topk]
