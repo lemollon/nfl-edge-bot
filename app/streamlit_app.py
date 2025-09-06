@@ -13,7 +13,7 @@ from whatif import score_archetypes
 from narrative_events import surprise_event
 
 
-load_dotenv()
+
 st.set_page_config(page_title="NFL Edge Coach", page_icon="🏈", layout="wide")
 st.title("🏈 NFL Edge Coach — Market Value × Narrative Pressure")
 
