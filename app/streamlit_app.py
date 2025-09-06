@@ -1,3 +1,7 @@
+import os
+import streamlit as st
+
+# --- relative imports because this file lives inside app/ ---
 from rag import SimpleRAG
 from feeds import fetch_news
 from player_news import fetch_player_news
@@ -12,30 +16,31 @@ from opponent_ai import generate_ai_plan
 from whatif import score_archetypes
 from narrative_events import surprise_event
 
-
-
+# --------------------------------------------------------------------------------------
+# App config
+# --------------------------------------------------------------------------------------
 st.set_page_config(page_title="NFL Edge Coach", page_icon="🏈", layout="wide")
 st.title("🏈 NFL Edge Coach — Market Value × Narrative Pressure")
 
-# -------------------------
-# Setup RAG and Model
-# -------------------------
+# --------------------------------------------------------------------------------------
+# RAG + Model
+# --------------------------------------------------------------------------------------
 @st.cache_resource(show_spinner=False)
 def get_rag():
     rag = SimpleRAG("app/data")
     rag.build()
     return rag
+
 rag = get_rag()
 
 with st.sidebar:
     st.subheader("Model Backend")
-    backend = st.selectbox("Backend", ["hf_inference","local"], index=0)
-    model_name = st.text_input(
-        "Model name", 
-        value="meta-llama/Meta-Llama-3-8B-Instruct" if backend=="hf_inference" else "Qwen/Qwen2.5-7B-Instruct"
-    )
-    st.caption("For hf_inference, set HUGGINGFACE_API_TOKEN in Secrets/env.")
+    # model.py maps everything to HF Inference to keep it light on Streamlit Cloud
+    backend = st.selectbox("Backend (uses HF Inference under the hood)", ["hf_inference"], index=0)
+    model_name = st.text_input("Model name", value="meta-llama/Meta-Llama-3-8B-Instruct")
+    st.caption("Set HUGGINGFACE_API_TOKEN in Streamlit Secrets (App → Settings → Secrets).")
     st.divider()
+
     st.subheader("Context")
     k_ctx = st.slider("RAG passages (k)", 3, 10, 5)
     use_news = st.checkbox("Include headlines", True)
@@ -48,11 +53,12 @@ with st.sidebar:
 @st.cache_resource(show_spinner=False)
 def get_model(backend, model_name):
     return LLMBackend(backend=backend, model_name=model_name)
+
 llm = get_model(backend, model_name)
 
-# -------------------------
+# --------------------------------------------------------------------------------------
 # Chat Mode
-# -------------------------
+# --------------------------------------------------------------------------------------
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
@@ -72,6 +78,7 @@ if prompt:
     if use_news:
         news_items = fetch_news(max_items=12, teams=teams)
         news_text = "\n\n".join([f"- {n['title']} — {n['summary']}" for n in news_items])
+
     players_list = [p.strip() for p in players_raw.split(",") if p.strip()]
     player_news_items = fetch_player_news(players_list, team_hint=teams[0] if teams else "", max_items_per_player=3) if (use_news and players_list) else []
     player_news_text = "\n".join([f"- ({it['player']}) {it['title']} — {it['summary']}" for it in player_news_items])
@@ -104,9 +111,9 @@ Recent NFL headlines:
             with open(fn, "rb") as f:
                 st.download_button("Download Edge Sheet PDF", data=f, file_name=fn, mime="application/pdf")
 
-# -------------------------
+# --------------------------------------------------------------------------------------
 # Game Mode
-# -------------------------
+# --------------------------------------------------------------------------------------
 st.divider()
 st.header("🎮 Game Mode — Weekly Challenge")
 colA, colB, colC, colD = st.columns(4)
@@ -196,12 +203,13 @@ st.dataframe(leaderboard(week=int(week)), use_container_width=True, hide_index=T
 st.subheader("📈 Ladder (Cumulative)")
 st.dataframe(ladder(), use_container_width=True, hide_index=True)
 
-# -------------------------
+# --------------------------------------------------------------------------------------
 # Fun Modes
-# -------------------------
+# --------------------------------------------------------------------------------------
 st.divider()
 st.header("🎲 Fun Modes")
 col_fun1, col_fun2 = st.columns(2)
+
 with col_fun1:
     st.subheader("🤖 Opponent AI Coach")
     last_user = st.session_state.chat[-1][1] if st.session_state.get("chat") else "Analyze PHI vs DAL edges."
@@ -228,4 +236,3 @@ if st.button("Roll Surprise Event"):
         st.write(f"Impact hint: {ev['impact']:+.1f}")
     else:
         st.write("No events found.")
-
