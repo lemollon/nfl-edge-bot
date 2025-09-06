@@ -19,8 +19,8 @@ from narrative_events import surprise_event
 # --------------------------------------------------------------------------------------
 # App config
 # --------------------------------------------------------------------------------------
-st.set_page_config(page_title="NFL Edge Coach", page_icon="🏈", layout="wide")
-st.title("🏈 NFL Edge Coach — Market Value × Narrative Pressure")
+st.set_page_config(page_title="GRIT", page_icon="🏈", layout="wide")
+st.title("🏈 GRIT — Market Value × Narrative Pressure")
 
 # --------------------------------------------------------------------------------------
 # RAG + Model
