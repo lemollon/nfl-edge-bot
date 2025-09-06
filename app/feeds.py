@@ -42,7 +42,6 @@ TEAM_FEEDS = {
 }
 
 def fetch_news(max_items: int = 20, teams: List[str] = None) -> List[Dict]:
-    """Fetches NFL news, optionally filtered by team codes."""
     items = []
     sources = FEEDS[:]
     if teams:
