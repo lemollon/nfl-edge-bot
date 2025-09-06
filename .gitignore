@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.faiss/
+.env
+app/data/ownership_snapshots/
+screenshots/*.png
