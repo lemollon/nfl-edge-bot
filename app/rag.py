@@ -4,9 +4,8 @@ from typing import List, Tuple
 import numpy as np
 from huggingface_hub import InferenceClient
 
-# Uses HF Inference Embeddings API (no local torch install)
-# Set HUGGINGFACE_API_TOKEN in Streamlit Secrets or env.
-
+# Set HUGGINGFACE_API_TOKEN in Streamlit Secrets (TOML):
+# HUGGINGFACE_API_TOKEN = "hf_...."
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
 class SimpleRAG:
@@ -33,10 +32,8 @@ class SimpleRAG:
         return out
 
     def _embed(self, texts: List[str]) -> np.ndarray:
-        # HF returns {'embeddings': [[...], ...]} for embeddings
         res = self.client.embeddings(model=EMBED_MODEL, inputs=texts)
         vecs = np.array(res["embeddings"], dtype="float32")
-        # normalize for cosine similarity
         norms = np.linalg.norm(vecs, axis=1, keepdims=True) + 1e-9
         return vecs / norms
 
@@ -51,6 +48,6 @@ class SimpleRAG:
 
     def search(self, query: str, k: int = 5) -> List[Tuple[float, dict]]:
         q = self._embed([query])[0]  # (d,)
-        sims = (self.embs @ q)  # cosine because both normalized
+        sims = (self.embs @ q)       # cosine because normalized
         topk = np.argsort(sims)[::-1][:k]
         return [(float(sims[i]), self.chunks[i]) for i in topk]
