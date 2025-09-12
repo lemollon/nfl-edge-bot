@@ -34,15 +34,15 @@ def clean_html(txt: str | None) -> str:
         return ""
     return html.unescape(TAG_RE.sub("", txt)).strip()
 
-# UPDATED: Fixed model choices with working alternatives to TinyLlama
+# FIXED: Updated model choices to match working models in model.py
 MODEL_CHOICES = {
-    "🚀 Qwen2.5 7B Instruct (fast)":        ("Qwen/Qwen2.5-7B-Instruct",          "Fast and capable; ungated."),
-    "✅ Zephyr 7B Beta (balanced)":          ("HuggingFaceH4/zephyr-7b-beta",       "Good quality/speed balance."),
     "⚡ DistilGPT2 (very fast, brief)":      ("distilgpt2",                         "Fastest; best for short answers."),
     "🔧 GPT2 Medium (reliable)":             ("gpt2-medium",                        "Reliable fallback option."),
+    "🚀 Qwen2.5 7B Instruct (fast)":        ("Qwen/Qwen2.5-7B-Instruct",          "Fast and capable; ungated."),
+    "✅ Zephyr 7B Beta (balanced)":          ("HuggingFaceH4/zephyr-7b-beta",       "Good quality/speed balance."),
     "🧪 Phi-3 Mini 4k (may be gated)":       ("microsoft/Phi-3-mini-4k-instruct",    "Small/capable; sometimes gated."),
 }
-DEFAULT_MODEL_LABEL = "✅ Zephyr 7B Beta (balanced)"
+DEFAULT_MODEL_LABEL = "⚡ DistilGPT2 (very fast, brief)"
 
 # =============================================================================
 # Cached resources
@@ -83,7 +83,7 @@ def safe_llm_answer(system_prompt: str, user_prompt: str, max_tokens: int = 512,
         if "404" in error_msg or "not found" in error_msg:
             return (
                 f"**Model error:** Model not available (404). "
-                f"Try switching to Qwen (fast) or Zephyr (balanced) in the model dropdown, "
+                f"Try switching to DistilGPT2 (very fast) or GPT2 Medium (reliable) in the model dropdown, "
                 f"or set Response length to Short.\n\n"
                 f"**Fallback Response:** Based on your question, I recommend checking the Edge System "
                 f"documents for strategic insights and considering market value vs narrative pressure dynamics."
@@ -104,7 +104,7 @@ def safe_llm_answer(system_prompt: str, user_prompt: str, max_tokens: int = 512,
         else:
             return (
                 f"**Model error:** {e}\n\n"
-                f"Try TinyLlama alternative (DistilGPT2) or Qwen (fast) in the model dropdown, "
+                f"Try DistilGPT2 (very fast) or GPT2 Medium (reliable) in the model dropdown, "
                 f"or set Response length to Short."
             )
 
@@ -121,17 +121,17 @@ with st.sidebar:
         help="This build uses Hugging Face Inference with your HUGGINGFACE_API_TOKEN."
     )
 
-    # Model dropdown with speed tool-tips (UPDATED: Removed broken TinyLlama)
+    # Model dropdown with speed tool-tips (FIXED: Now uses working models first)
     model_label = st.selectbox(
         "Model",
         options=list(MODEL_CHOICES.keys()),
         index=list(MODEL_CHOICES.keys()).index(DEFAULT_MODEL_LABEL),
-        help="Qwen=fast; Zephyr=balanced; DistilGPT2=fastest; Phi-3 may be gated."
+        help="DistilGPT2=fastest; GPT2=reliable; Qwen=fast; Zephyr=balanced; Phi-3 may be gated."
     )
     model_name = MODEL_CHOICES[model_label][0]
     st.caption(f"**Selected:** `{model_name}` — {MODEL_CHOICES[model_label][1]}")
 
-    # Turbo mode (UPDATED: Uses DistilGPT2 instead of TinyLlama)
+    # Turbo mode (FIXED: Uses DistilGPT2 instead of TinyLlama)
     turbo = st.toggle("Turbo Mode (fastest)", value=False, help="Forces DistilGPT2 + Short + k=3 and disables headlines for max speed.")
     if turbo:
         model_name = MODEL_CHOICES["⚡ DistilGPT2 (very fast, brief)"][0]
@@ -174,7 +174,7 @@ with st.sidebar:
 # Create model after selections
 llm = get_model(backend, model_name)
 
-# Turbo banner (UPDATED: References DistilGPT2)
+# Turbo banner (FIXED: References DistilGPT2)
 if turbo:
     st.info("**Turbo Mode enabled** — DistilGPT2 + Short responses + k=3 + headlines off for maximum speed.")
 
