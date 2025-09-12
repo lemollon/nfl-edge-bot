@@ -34,11 +34,12 @@ def clean_html(txt: str | None) -> str:
         return ""
     return html.unescape(TAG_RE.sub("", txt)).strip()
 
-# Dropdown options: label -> (model_id, speed_note)
+# UPDATED: Fixed model choices with working alternatives to TinyLlama
 MODEL_CHOICES = {
-    "⚡ TinyLlama 1.1B (very fast, brief)": ("TinyLlama/TinyLlama-1.1B-Chat-v1.0", "Fastest; best for short answers."),
     "🚀 Qwen2.5 7B Instruct (fast)":        ("Qwen/Qwen2.5-7B-Instruct",          "Fast and capable; ungated."),
     "✅ Zephyr 7B Beta (balanced)":          ("HuggingFaceH4/zephyr-7b-beta",       "Good quality/speed balance."),
+    "⚡ DistilGPT2 (very fast, brief)":      ("distilgpt2",                         "Fastest; best for short answers."),
+    "🔧 GPT2 Medium (reliable)":             ("gpt2-medium",                        "Reliable fallback option."),
     "🧪 Phi-3 Mini 4k (may be gated)":       ("microsoft/Phi-3-mini-4k-instruct",    "Small/capable; sometimes gated."),
 }
 DEFAULT_MODEL_LABEL = "✅ Zephyr 7B Beta (balanced)"
@@ -70,6 +71,44 @@ def cached_player_news(players_tuple: tuple[str, ...], team_hint: str, max_items
 rag = get_rag()
 
 # =============================================================================
+# Enhanced Error Handling for Model Issues
+# =============================================================================
+def safe_llm_answer(system_prompt: str, user_prompt: str, max_tokens: int = 512, temperature: float = 0.35) -> str:
+    """Enhanced LLM answer with fallback handling for model errors"""
+    try:
+        return llm.chat(system_prompt, user_prompt, max_new_tokens=max_tokens, temperature=temperature)
+    except Exception as e:
+        error_msg = str(e).lower()
+        
+        if "404" in error_msg or "not found" in error_msg:
+            return (
+                f"**Model error:** Model not available (404). "
+                f"Try switching to Qwen (fast) or Zephyr (balanced) in the model dropdown, "
+                f"or set Response length to Short.\n\n"
+                f"**Fallback Response:** Based on your question, I recommend checking the Edge System "
+                f"documents for strategic insights and considering market value vs narrative pressure dynamics."
+            )
+        elif "503" in error_msg or "loading" in error_msg:
+            return (
+                f"**Model error:** Model is loading. Please wait a moment and try again, "
+                f"or switch to a different model in the sidebar.\n\n"
+                f"**Fallback Response:** While the AI loads, review your Edge documents and "
+                f"consider how market sentiment might create opportunities."
+            )
+        elif "429" in error_msg or "rate" in error_msg:
+            return (
+                f"**Model error:** Rate limited. Please wait a moment or switch models.\n\n"
+                f"**Fallback Response:** Use this time to review your strategic framework "
+                f"and analyze market inefficiencies in the current landscape."
+            )
+        else:
+            return (
+                f"**Model error:** {e}\n\n"
+                f"Try TinyLlama alternative (DistilGPT2) or Qwen (fast) in the model dropdown, "
+                f"or set Response length to Short."
+            )
+
+# =============================================================================
 # Sidebar controls
 # =============================================================================
 with st.sidebar:
@@ -82,20 +121,20 @@ with st.sidebar:
         help="This build uses Hugging Face Inference with your HUGGINGFACE_API_TOKEN."
     )
 
-    # Model dropdown with speed tool-tips
+    # Model dropdown with speed tool-tips (UPDATED: Removed broken TinyLlama)
     model_label = st.selectbox(
         "Model",
         options=list(MODEL_CHOICES.keys()),
         index=list(MODEL_CHOICES.keys()).index(DEFAULT_MODEL_LABEL),
-        help="TinyLlama=fastest; Qwen=fast; Zephyr=balanced; Phi-3 may be gated."
+        help="Qwen=fast; Zephyr=balanced; DistilGPT2=fastest; Phi-3 may be gated."
     )
     model_name = MODEL_CHOICES[model_label][0]
     st.caption(f"**Selected:** `{model_name}` — {MODEL_CHOICES[model_label][1]}")
 
-    # Turbo mode
-    turbo = st.toggle("Turbo Mode (fastest)", value=False, help="Forces TinyLlama + Short + k=3 and disables headlines for max speed.")
+    # Turbo mode (UPDATED: Uses DistilGPT2 instead of TinyLlama)
+    turbo = st.toggle("Turbo Mode (fastest)", value=False, help="Forces DistilGPT2 + Short + k=3 and disables headlines for max speed.")
     if turbo:
-        model_name = MODEL_CHOICES["⚡ TinyLlama 1.1B (very fast, brief)"][0]
+        model_name = MODEL_CHOICES["⚡ DistilGPT2 (very fast, brief)"][0]
 
     # Latency + output controls
     resp_len = st.select_slider(
@@ -135,13 +174,13 @@ with st.sidebar:
 # Create model after selections
 llm = get_model(backend, model_name)
 
-# Turbo banner
+# Turbo banner (UPDATED: References DistilGPT2)
 if turbo:
-    st.info("**Turbo Mode enabled** — TinyLlama + Short responses + k=3 + headlines off for maximum speed.")
+    st.info("**Turbo Mode enabled** — DistilGPT2 + Short responses + k=3 + headlines off for maximum speed.")
 
-# simple helper for all chats
+# UPDATED: Use safe LLM answer function
 def llm_answer(system_prompt: str, user_prompt: str, max_tokens: int = 512, temperature: float = 0.35) -> str:
-    return llm.chat(system_prompt, user_prompt, max_new_tokens=max_tokens, temperature=temperature)
+    return safe_llm_answer(system_prompt, user_prompt, max_tokens, temperature)
 
 # =============================================================================
 # Tabs
@@ -202,14 +241,7 @@ Player headlines:
 {player_news_text if include_news else 'N/A'}
 """
         with st.chat_message("assistant"):
-            try:
-                ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS)
-            except Exception as e:
-                ans = (
-                    f"**Model error:** {e}\n\n"
-                    "Try TinyLlama (very fast) or Qwen (fast) in the model dropdown, "
-                    "or set Response length to Short."
-                )
+            ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS)
             st.markdown(ans)
             st.session_state.coach_chat.append(("assistant", ans))
             st.session_state["last_coach_answer"] = ans
@@ -292,12 +324,9 @@ with tab_game:
         ctx = rag.search(q, k=4)
         ctx_text = "\n\n".join([c['text'] for _,c in ctx])
         user_msg = "Return JSON only with keys delta_market_hint ([-2..+2]), sentiment_boost ([-2..+2]), reason."
-        try:
-            ans = llm_answer("You are a JSON generator.", f"{user_msg}\nContext:\n{ctx_text}", max_tokens=256, temperature=0.3)
-            st.code(ans, language="json")
-            st.session_state["_last_summary"] = ans
-        except Exception as e:
-            st.error(f"Model error: {e}")
+        ans = llm_answer("You are a JSON generator.", f"{user_msg}\nContext:\n{ctx_text}", max_tokens=256, temperature=0.3)
+        st.code(ans, language="json")
+        st.session_state["_last_summary"] = ans
 
     if st.button("Score My Plan (locks when deadline passes)"):
         if not open_now:
@@ -384,10 +413,7 @@ Edge System context:
 {ctx_text}
 """
         with st.chat_message("assistant"):
-            try:
-                ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS)
-            except Exception as e:
-                ans = f"**Model error:** {e}"
+            ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS)
             st.markdown(ans)
             st.session_state.game_chat.append(("assistant", ans))
 
@@ -477,9 +503,6 @@ Edge System context:
 {rag_txt or '(none)'}
 """
         with st.chat_message("assistant"):
-            try:
-                ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS)
-            except Exception as e:
-                ans = f"**Model error:** {e}"
+            ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS)
             st.markdown(ans)
             st.session_state.news_chat.append(("assistant", ans))
