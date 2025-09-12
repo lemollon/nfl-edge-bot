@@ -4,12 +4,13 @@ from typing import List, Optional
 from huggingface_hub import InferenceClient
 from huggingface_hub.utils._errors import HfHubHTTPError
 
-# FIXED: Removed broken TinyLlama model from the list
+# FIXED: Reordered models with most reliable first, removed broken TinyLlama
 OPEN_MODELS: List[str] = [
-    "HuggingFaceH4/zephyr-7b-beta",
+    "distilgpt2",  # Most reliable - rarely has 404 errors
+    "gpt2-medium", # Backup reliable option
     "Qwen/Qwen2.5-7B-Instruct", 
+    "HuggingFaceH4/zephyr-7b-beta",
     "microsoft/Phi-3-mini-4k-instruct",
-    "distilgpt2",  # Added as reliable fast fallback
 ]
 
 class LLMBackend:
@@ -61,7 +62,7 @@ class LLMBackend:
 
         msg = (
             "All inference backends failed (model may be gated or rate-limited). "
-            "Try a different model in the sidebar (e.g., Qwen2.5 7B Instruct or DistilGPT2)."
+            "Try switching to DistilGPT2 (very fast) or GPT2 Medium in the model dropdown."
         )
         if last_err:
             msg += f"\nLast error: {type(last_err).__name__}: {last_err}"
