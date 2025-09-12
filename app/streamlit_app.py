@@ -34,234 +34,81 @@ def clean_html(txt: str | None) -> str:
         return ""
     return html.unescape(TAG_RE.sub("", txt)).strip()
 
-# Model choices for debugging
-MODEL_CHOICES = {
-    "⚡ DistilGPT2 (very fast, brief)":      ("distilgpt2",                         "Fastest; best for short answers."),
-    "🔧 GPT2 Medium (reliable)":             ("gpt2-medium",                        "Reliable fallback option."),
-    "🚀 Qwen2.5 7B Instruct (fast)":        ("Qwen/Qwen2.5-7B-Instruct",          "Fast and capable; ungated."),
-    "✅ Zephyr 7B Beta (balanced)":          ("HuggingFaceH4/zephyr-7b-beta",       "Good quality/speed balance."),
-    "🧪 Phi-3 Mini 4k (may be gated)":       ("microsoft/Phi-3-mini-4k-instruct",    "Small/capable; sometimes gated."),
+# AI Backend choices
+AI_BACKEND_CHOICES = {
+    "OpenAI GPT-3.5 Turbo (Recommended)": "openai-gpt35",
+    "OpenAI GPT-4 (Premium)": "openai-gpt4", 
+    "Bypass Mode (Reliable)": "bypass",
+    "HuggingFace (Experimental)": "huggingface"
 }
-DEFAULT_MODEL_LABEL = "⚡ DistilGPT2 (very fast, brief)"
+DEFAULT_AI_BACKEND = "OpenAI GPT-3.5 Turbo (Recommended)"
 
 # =============================================================================
-# DEBUG FUNCTIONS
+# OpenAI Integration
 # =============================================================================
-def test_all_models():
-    """Test each model individually to see which ones work"""
-    from huggingface_hub import InferenceClient
-    
-    models_to_test = [
-        "distilgpt2",
-        "gpt2-medium", 
-        "Qwen/Qwen2.5-7B-Instruct",
-        "HuggingFaceH4/zephyr-7b-beta",
-        "microsoft/Phi-3-mini-4k-instruct"
-    ]
-    
-    hf_token = os.getenv("HUGGINGFACE_API_TOKEN")
-    if not hf_token:
-        st.error("No HuggingFace token found!")
-        return
-    
-    st.subheader("🧪 Model Availability Test Results")
-    
-    for model in models_to_test:
-        with st.expander(f"Testing {model}"):
-            try:
-                client = InferenceClient(model=model, token=hf_token)
-                
-                # Test 1: Simple text generation
-                st.write("**Test 1: Text Generation**")
-                result = client.text_generation(
-                    "The best fantasy football strategy is",
-                    max_new_tokens=30,
-                    temperature=0.7
-                )
-                st.success(f"✅ Text generation works: {result}")
-                
-                # Test 2: Chat completion (if supported)
-                st.write("**Test 2: Chat Completion**")
-                try:
-                    chat_result = client.chat_completion(
-                        messages=[{"role": "user", "content": "What is the best QB strategy?"}],
-                        max_tokens=50
-                    )
-                    st.success(f"✅ Chat completion works: {chat_result.choices[0].message['content']}")
-                except Exception as chat_error:
-                    st.warning(f"⚠️ Chat completion failed: {chat_error}")
-                
-            except Exception as e:
-                st.error(f"❌ Model {model} failed: {str(e)}")
-                st.code(f"Error details: {type(e).__name__}: {e}")
-
-def test_model_backend():
-    """Test your LLMBackend class directly"""
-    st.subheader("🔧 Testing LLMBackend Class")
-    
+def openai_chat(system_prompt: str, user_prompt: str, max_tokens: int = 512, temperature: float = 0.7, model: str = "gpt-3.5-turbo") -> str:
+    """OpenAI Chat Completion with error handling"""
     try:
-        # Test with each model
-        for model_label, (model_name, description) in MODEL_CHOICES.items():
-            with st.expander(f"Testing LLMBackend with {model_name}"):
-                try:
-                    backend = LLMBackend(backend="hf_inference", model_name=model_name)
-                    response = backend.chat(
-                        "You are a fantasy football expert.",
-                        "What is the best QB strategy?",
-                        max_new_tokens=50,
-                        temperature=0.7
-                    )
-                    st.success(f"✅ LLMBackend works with {model_name}")
-                    st.write(f"Response: {response}")
-                except Exception as e:
-                    st.error(f"❌ LLMBackend failed with {model_name}: {e}")
-                    st.code(f"Error details: {type(e).__name__}: {e}")
+        import openai
+        
+        # Get API key from environment
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if not openai_key:
+            return "❌ OpenAI API key not found. Please set OPENAI_API_KEY in your environment variables."
+        
+        # Set up client
+        client = openai.OpenAI(api_key=openai_key)
+        
+        # Make API call
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=0.9
+        )
+        
+        return response.choices[0].message.content.strip()
+        
+    except ImportError:
+        return "❌ OpenAI library not installed. Run: pip install openai"
     except Exception as e:
-        st.error(f"❌ LLMBackend class error: {e}")
+        error_msg = str(e)
+        if "api_key" in error_msg.lower():
+            return "❌ Invalid OpenAI API key. Please check your OPENAI_API_KEY environment variable."
+        elif "rate_limit" in error_msg.lower():
+            return "❌ OpenAI rate limit exceeded. Please try again in a moment."
+        elif "insufficient_quota" in error_msg.lower():
+            return "❌ OpenAI quota exceeded. Please check your billing settings."
+        else:
+            return f"❌ OpenAI error: {error_msg}"
 
 # =============================================================================
-# Cached resources
+# Enhanced Error Handling for Model Issues (FEATURE 8)
 # =============================================================================
-@st.cache_resource(show_spinner=False)
-def get_rag():
-    rag = SimpleRAG("app/data")
-    rag.build()
-    return rag
-
-@st.cache_resource(show_spinner=False)
-def get_model(backend: str, model_name: str):
-    return LLMBackend(backend=backend, model_name=model_name)
-
-# Cache RSS fetches briefly to cut latency on repeated calls
-@st.cache_data(ttl=120, show_spinner=False)
-def cached_news(max_items: int, teams_tuple: tuple[str, ...]):
-    teams = list(teams_tuple)
-    return fetch_news(max_items=max_items, teams=teams)
-
-@st.cache_data(ttl=120, show_spinner=False)
-def cached_player_news(players_tuple: tuple[str, ...], team_hint: str, max_items_per_player: int):
-    players = list(players_tuple)
-    return fetch_player_news(players, team_hint=team_hint, max_items_per_player=max_items_per_player)
-
-rag = get_rag()
-
-# =============================================================================
-# Sidebar controls WITH DEBUG
-# =============================================================================
-with st.sidebar:
-    st.subheader("🔧 Debug & Model Testing")
+def safe_llm_answer(system_prompt: str, user_prompt: str, max_tokens: int = 512, temperature: float = 0.35, backend: str = "openai-gpt35") -> str:
+    """Enhanced LLM answer with fallback handling for model errors"""
     
-    # DEBUG: Check environment variables
-    hf_token = os.getenv("HUGGINGFACE_API_TOKEN")
-    if hf_token:
-        st.success(f"HF Token found: {hf_token[:8]}...")
-    else:
-        st.error("❌ HUGGINGFACE_API_TOKEN not found!")
-        st.markdown("Check your Streamlit Cloud secrets or .env file")
+    if backend == "openai-gpt35":
+        return openai_chat(system_prompt, user_prompt, max_tokens, temperature, "gpt-3.5-turbo")
     
-    # DEBUG: Test single model directly
-    if st.button("🚀 Test Direct Model Call"):
+    elif backend == "openai-gpt4":
+        return openai_chat(system_prompt, user_prompt, max_tokens, temperature, "gpt-4")
+    
+    elif backend == "huggingface":
         try:
-            from huggingface_hub import InferenceClient
-            client = InferenceClient(model="distilgpt2", token=hf_token)
-            result = client.text_generation("The best QB strategy is", max_new_tokens=50)
-            st.success(f"✅ Direct call works: {result}")
+            # Try HuggingFace as fallback
+            llm = get_model("hf_inference", "distilgpt2")
+            return llm.chat(system_prompt, user_prompt, max_new_tokens=max_tokens, temperature=temperature)
         except Exception as e:
-            st.error(f"❌ Direct call failed: {e}")
-            st.code(f"Error: {type(e).__name__}: {e}")
+            return f"❌ HuggingFace failed: {e}. Try OpenAI or Bypass mode."
     
-    # DEBUG: Test all models
-    if st.button("🧪 Test All Models"):
-        test_all_models()
+    elif backend == "bypass":
+        return generate_bypass_response(user_prompt)
     
-    # DEBUG: Test LLMBackend
-    if st.button("🔧 Test LLMBackend"):
-        test_model_backend()
-    
-    st.divider()
-    st.subheader("Model & Retrieval")
-
-    backend = st.selectbox(
-        "Backend (HF Inference under the hood)",
-        ["hf_inference"],
-        index=0,
-        help="This build uses Hugging Face Inference with your HUGGINGFACE_API_TOKEN."
-    )
-
-    # Model dropdown
-    model_label = st.selectbox(
-        "Model",
-        options=list(MODEL_CHOICES.keys()),
-        index=list(MODEL_CHOICES.keys()).index(DEFAULT_MODEL_LABEL),
-        help="DistilGPT2=fastest; GPT2=reliable; Qwen=fast; Zephyr=balanced; Phi-3 may be gated."
-    )
-    model_name = MODEL_CHOICES[model_label][0]
-    st.caption(f"**Selected:** `{model_name}` — {MODEL_CHOICES[model_label][1]}")
-
-    # Turbo mode
-    turbo = st.toggle("Turbo Mode (fastest)", value=False, help="Forces DistilGPT2 + Short + k=3 and disables headlines for max speed.")
-    if turbo:
-        model_name = MODEL_CHOICES["⚡ DistilGPT2 (very fast, brief)"][0]
-
-    # Latency + output controls
-    resp_len = st.select_slider(
-        "Response length", options=["Short","Medium","Long"],
-        value=("Short" if turbo else "Medium"),
-        help="Short≈256 tokens, Medium≈512, Long≈800."
-    )
-    MAX_TOKENS = {"Short": 256, "Medium": 512, "Long": 800}[resp_len]
-
-    latency_mode = st.selectbox(
-        "Latency mode", ["Fast","Balanced","Thorough"],
-        index=(0 if turbo else 1),
-        help="Controls default RAG k. Fast=3, Balanced=5, Thorough=8."
-    )
-    default_k = {"Fast": 3, "Balanced": 5, "Thorough": 8}[latency_mode]
-    k_ctx = st.slider(
-        "RAG passages (k)", 3, 10, (3 if turbo else default_k),
-        help="How many passages from your Edge docs are added to the prompt. Lower = faster."
-    )
-
-    st.divider()
-    include_news = st.checkbox(
-        "Include headlines in prompts", (False if turbo else True),
-        help="Pulls team + player headlines into context (slower but richer)."
-    )
-    team_codes = st.text_input("Focus teams (comma-separated)", "PHI, DAL")
-    players_raw = st.text_area("Players (comma-separated)", "Jalen Hurts, CeeDee Lamb")
-    st.session_state["team_codes"] = team_codes
-
-    st.divider()
-    if st.button("Rebuild Edge Corpus (reload app/data/*.txt)"):
-        st.cache_resource.clear()
-        st.cache_data.clear()
-        st.success("Rebuilt corpus. Reloading…")
-        st.rerun()
-
-# Create model after selections
-llm = get_model(backend, model_name)
-
-# Turbo banner
-if turbo:
-    st.info("**Turbo Mode enabled** — DistilGPT2 + Short responses + k=3 + headlines off for maximum speed.")
-
-# ATTEMPT REAL AI CALL WITH FALLBACK TO BYPASS
-def llm_answer(system_prompt: str, user_prompt: str, max_tokens: int = 512, temperature: float = 0.35) -> str:
-    """Try real AI first, fallback to bypass if needed"""
-    
-    # Toggle between real AI and bypass
-    use_real_ai = st.session_state.get("use_real_ai", False)
-    
-    if use_real_ai:
-        try:
-            # Attempt real AI call
-            response = llm.chat(system_prompt, user_prompt, max_new_tokens=max_tokens, temperature=temperature)
-            return f"🤖 **AI Response:** {response}"
-        except Exception as e:
-            # Log the error and fall back to bypass
-            error_details = f"AI Error: {type(e).__name__}: {e}"
-            st.sidebar.error(f"AI failed: {error_details}")
-            return generate_bypass_response(user_prompt) + f"\n\n*Note: AI unavailable, using bypass. Error: {error_details}*"
     else:
         return generate_bypass_response(user_prompt)
 
@@ -312,29 +159,163 @@ Based on the Market Value × Narrative Pressure framework:
 
 *Using bypass mode for reliable responses.*"""
 
-# Add AI toggle in sidebar
-with st.sidebar:
-    st.divider()
-    st.subheader("🤖 AI Mode")
-    use_real_ai = st.toggle("Use Real AI (vs Bypass)", value=False, help="Toggle between real AI calls and reliable bypass responses")
-    st.session_state["use_real_ai"] = use_real_ai
-    
-    if use_real_ai:
-        st.info("Real AI enabled - responses will attempt HuggingFace models")
-    else:
-        st.info("Bypass mode - using reliable pre-written responses")
+# =============================================================================
+# Cached resources (FEATURES 47)
+# =============================================================================
+@st.cache_resource(show_spinner=False)
+def get_rag():
+    rag = SimpleRAG("app/data")
+    rag.build()
+    return rag
+
+@st.cache_resource(show_spinner=False)
+def get_model(backend: str, model_name: str):
+    return LLMBackend(backend=backend, model_name=model_name)
+
+# Cache RSS fetches briefly to cut latency on repeated calls
+@st.cache_data(ttl=120, show_spinner=False)
+def cached_news(max_items: int, teams_tuple: tuple[str, ...]):
+    teams = list(teams_tuple)
+    return fetch_news(max_items=max_items, teams=teams)
+
+@st.cache_data(ttl=120, show_spinner=False)
+def cached_player_news(players_tuple: tuple[str, ...], team_hint: str, max_items_per_player: int):
+    players = list(players_tuple)
+    return fetch_player_news(players, team_hint=team_hint, max_items_per_player=max_items_per_player)
+
+rag = get_rag()
 
 # =============================================================================
-# Tabs
+# Sidebar controls (FEATURES 9-20)
+# =============================================================================
+with st.sidebar:
+    st.subheader("🤖 AI Backend")
+    
+    # OpenAI API Key check
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if openai_key:
+        st.success(f"OpenAI API Key found: {openai_key[:8]}...")
+    else:
+        st.warning("⚠️ OPENAI_API_KEY not set")
+        st.caption("Add your OpenAI API key to environment variables for AI features")
+    
+    # FEATURE 9: AI Backend Selection (Enhanced Model Selection)
+    ai_backend_label = st.selectbox(
+        "AI Backend",
+        options=list(AI_BACKEND_CHOICES.keys()),
+        index=list(AI_BACKEND_CHOICES.keys()).index(DEFAULT_AI_BACKEND),
+        help="OpenAI provides the most reliable AI responses. Bypass mode uses expert-written responses."
+    )
+    ai_backend = AI_BACKEND_CHOICES[ai_backend_label]
+    
+    if ai_backend.startswith("openai") and not openai_key:
+        st.error("OpenAI backend selected but no API key found!")
+        ai_backend = "bypass"
+        st.info("Falling back to Bypass mode")
+    
+    # FEATURE 20: Model Caption Display
+    if ai_backend == "openai-gpt35":
+        st.caption("**Selected:** `gpt-3.5-turbo` — Fast, reliable, cost-effective")
+    elif ai_backend == "openai-gpt4":
+        st.caption("**Selected:** `gpt-4` — Highest quality responses")
+    elif ai_backend == "bypass":
+        st.caption("**Selected:** `bypass` — Expert-written responses")
+    else:
+        st.caption("**Selected:** `huggingface` — Experimental fallback")
+    
+    st.divider()
+    st.subheader("Model & Retrieval")
+
+    # FEATURE 18: Backend Selection
+    backend = st.selectbox(
+        "Backend (HF Inference under the hood)",
+        ["hf_inference"],
+        index=0,
+        help="This build uses Hugging Face Inference with your HUGGINGFACE_API_TOKEN."
+    )
+
+    # FEATURE 10: Turbo Mode Toggle
+    turbo = st.toggle("Turbo Mode (fastest)", value=False, help="Forces fastest settings + Short + k=3 and disables headlines for max speed.")
+    if turbo:
+        ai_backend = "bypass"  # Force bypass in turbo mode
+
+    # FEATURE 11: Response Length Control
+    resp_len = st.select_slider(
+        "Response length", options=["Short","Medium","Long"],
+        value=("Short" if turbo else "Medium"),
+        help="Short≈256 tokens, Medium≈512, Long≈800."
+    )
+    MAX_TOKENS = {"Short": 256, "Medium": 512, "Long": 800}[resp_len]
+
+    # FEATURE 42: Temperature Control
+    temperature = st.slider(
+        "AI Creativity", 0.1, 1.0, (0.3 if turbo else 0.7), 0.1,
+        help="Lower = more focused, Higher = more creative"
+    )
+
+    # FEATURE 12: Latency Mode Selection
+    latency_mode = st.selectbox(
+        "Latency mode", ["Fast","Balanced","Thorough"],
+        index=(0 if turbo else 1),
+        help="Controls default RAG k. Fast=3, Balanced=5, Thorough=8."
+    )
+    default_k = {"Fast": 3, "Balanced": 5, "Thorough": 8}[latency_mode]
+    
+    # FEATURE 13: RAG Passage Control
+    k_ctx = st.slider(
+        "RAG passages (k)", 3, 10, (3 if turbo else default_k),
+        help="How many passages from your Edge docs are added to the prompt. Lower = faster."
+    )
+
+    st.divider()
+    
+    # FEATURE 14: Headlines Toggle
+    include_news = st.checkbox(
+        "Include headlines in prompts", (False if turbo else True),
+        help="Pulls team + player headlines into context (slower but richer)."
+    )
+    
+    # FEATURE 15: Team Focus Input
+    team_codes = st.text_input("Focus teams (comma-separated)", "PHI, DAL")
+    
+    # FEATURE 16: Player Focus Input
+    players_raw = st.text_area("Players (comma-separated)", "Jalen Hurts, CeeDee Lamb")
+    st.session_state["team_codes"] = team_codes
+
+    st.divider()
+    
+    # FEATURE 17: Corpus Rebuild Button
+    if st.button("Rebuild Edge Corpus (reload app/data/*.txt)"):
+        st.cache_resource.clear()
+        st.cache_data.clear()
+        st.success("Rebuilt corpus. Reloading…")
+        st.rerun()
+
+# Create model after selections (for HuggingFace fallback)
+llm = get_model(backend, "distilgpt2")
+
+# FEATURE 19: Turbo Banner
+if turbo:
+    st.info("**Turbo Mode enabled** — Bypass mode + Short responses + k=3 + headlines off for maximum speed.")
+
+# Main AI function
+def llm_answer(system_prompt: str, user_prompt: str, max_tokens: int = 512, temperature_val: float = 0.35) -> str:
+    return safe_llm_answer(system_prompt, user_prompt, max_tokens, temperature_val, ai_backend)
+
+# =============================================================================
+# FEATURE 51: Tab-based Navigation
 # =============================================================================
 tab_coach, tab_game, tab_news = st.tabs(["📋 Coach Mode", "🎮 Game Mode", "📰 Headlines"])
 
 # --------------------------------------------------------------------------------------
-# 📋 Coach Mode (chat + on-demand PDF)
+# 📋 Coach Mode (FEATURES 21-25)
 # --------------------------------------------------------------------------------------
 with tab_coach:
+    # FEATURE 21: Coach Chat Interface
     st.subheader("Coach Chat")
+    st.caption(f"AI Backend: {ai_backend_label}")
 
+    # FEATURE 22: Chat History Persistence
     if "coach_chat" not in st.session_state:
         st.session_state.coach_chat = []
 
@@ -346,11 +327,11 @@ with tab_coach:
         st.session_state.coach_chat.append(("user", coach_q))
         st.chat_message("user").markdown(coach_q)
 
-        # RAG context
+        # FEATURE 23: RAG Context Integration
         ctx = rag.search(coach_q, k=k_ctx)
         ctx_text = "\n\n".join([f"[{i+1}] {c['text']}" for i,(_,c) in enumerate(ctx)])
 
-        # optional news
+        # FEATURE 24: News Integration in Prompts
         teams = [t.strip() for t in team_codes.split(",") if t.strip()]
         news_text = ""
         player_news_text = ""
@@ -368,6 +349,7 @@ with tab_coach:
             except Exception as e:
                 player_news_text = f"(player headlines unavailable: {e})"
 
+        # FEATURE 49: Dynamic Context Building
         user_msg = f"""{EDGE_INSTRUCTIONS}
 
 Coach question:
@@ -383,12 +365,12 @@ Player headlines:
 {player_news_text if include_news else 'N/A'}
 """
         with st.chat_message("assistant"):
-            ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS)
+            ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS, temperature_val=temperature)
             st.markdown(ans)
             st.session_state.coach_chat.append(("assistant", ans))
             st.session_state["last_coach_answer"] = ans
 
-    # On-demand PDF (doesn't slow the chat)
+    # FEATURE 25: PDF Generation from Last Answer
     st.divider()
     st.caption("Create a PDF from the **last** assistant answer:")
     if st.button("Generate Edge Sheet PDF"):
@@ -408,31 +390,267 @@ Player headlines:
                 st.caption(f"(PDF export unavailable: {e})")
 
 # --------------------------------------------------------------------------------------
-# 🎮 Game Mode (upload + scoring + chat) - SIMPLIFIED FOR DEBUGGING
+# 🎮 Game Mode (FEATURES 26-40)
 # --------------------------------------------------------------------------------------
 with tab_game:
+    # FEATURE 26: Weekly Challenge System
     st.subheader("Weekly Challenge")
-    st.info("Game Mode preserved but simplified for debugging - all original features remain")
-    
-    # Basic game mode elements
-    username = st.text_input("Username", value="guest")
-    week = st.number_input("Week", min_value=1, max_value=18, value=1, step=1)
-    
-    # Simple test of game mode chat
-    if st.button("Test Game Mode AI"):
-        test_response = llm_answer("You are a fantasy expert", "Help me build a lineup", max_tokens=100)
-        st.write("Game Mode AI Test:")
-        st.markdown(test_response)
+
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        # FEATURE 27: Username Input
+        username = st.text_input("Username", value="guest")
+    with c2:
+        # FEATURE 28: Week Selection
+        week = st.number_input("Week", min_value=1, max_value=18, value=1, step=1)
+    with c3:
+        # FEATURE 29: Confidence Slider
+        usage_hint = st.slider("Confidence in plan", 0.0, 1.0, 0.6, 0.05)
+    with c4:
+        # FEATURE 30: Underdog Checkbox
+        underdog = st.checkbox("Underdog Plan?", value=False)
+
+    # FEATURE 31: Submission Status Display
+    open_now = is_submission_open(int(week))
+    st.info("Submissions open ✅" if open_now else "Submissions closed ⛔ for this week")
+
+    # FEATURE 32: CSV Roster Upload (Team A & B)
+    st.markdown("**Upload Rosters (CSV)** — optional but recommended  \n"
+                "_Columns: Player, Pos, % Rostered_")
+    a_file = st.file_uploader("Your Team Roster (CSV)", type=["csv"], key="a_csv")
+    b_file = st.file_uploader("Opponent Roster (CSV)", type=["csv"], key="b_csv")
+
+    # FEATURE 33: Market Delta Analysis & Display
+    delta_val = 0.0
+    roster_context_str = ""
+    if a_file and b_file:
+        import pandas as pd
+        try:
+            a_df = normalize_roster(pd.read_csv(a_file))
+            b_df = normalize_roster(pd.read_csv(b_file))
+            dpos = market_delta_by_position(a_df, b_df)
+            st.write("Positional Market Delta (B − A):")
+            st.dataframe(dpos, hide_index=True, use_container_width=True)
+            delta_val = float(delta_scalar(dpos))
+            st.success(f"Scalar Market Delta: {delta_val:.3f}")
+            roster_context_str = f"Scalar market delta (B−A): {delta_val:.3f}\n\n{dpos.to_csv(index=False)}"
+        except Exception as e:
+            st.warning(f"Roster parsing error: {e}")
+
+    # FEATURE 34: Edge Plan Input (Team, Opponent, Picks, Rationale)
+    st.markdown("**Your Edge Plan**")
+    team_focus = st.text_input("Your team code (e.g., PHI)", value="PHI")
+    opponent = st.text_input("Opponent team code (e.g., DAL)", value="DAL")
+    picks = st.text_area(
+        "Your 2–3 key calls (one per line)",
+        "1) 1st & 10, 12P — PA flood to TE seam — vs single-high — LB bites on run keys\n"
+        "2) 3rd & medium, 11P — WR2 deep cross from stack — attack CB2 leverage\n"
+        "3) Red zone — RB screen constraint — vs pressure tendency"
+    )
+    rationale = st.text_area(
+        "Why this works (market vs pressure)",
+        "WR2 undervalued; CB2 leverage issues; positive sentiment."
+    )
+
+    # FEATURE 35: LLM Market/Pressure Summary Generation
+    if st.button("Generate Market/Pressure Summary (LLM)"):
+        q = f"Summarize market vs narrative edges for {team_focus} vs {opponent} in one paragraph."
+        ctx = rag.search(q, k=4)
+        ctx_text = "\n\n".join([c['text'] for _,c in ctx])
+        user_msg = "Return JSON only with keys delta_market_hint ([-2..+2]), sentiment_boost ([-2..+2]), reason."
+        ans = llm_answer("You are a JSON generator.", f"{user_msg}\nContext:\n{ctx_text}", max_tokens=256, temperature_val=0.3)
+        st.code(ans, language="json")
+        st.session_state["_last_summary"] = ans
+
+    # FEATURE 36: Plan Scoring Algorithm
+    if st.button("Score My Plan (locks when deadline passes)"):
+        if not open_now:
+            st.error("Submissions are closed for this week.")
+        else:
+            hint = st.session_state.get("_last_summary", '{"delta_market_hint":0,"sentiment_boost":0,"reason":"n/a"}')
+            try:
+                # FEATURE 41: JSON Response Parsing
+                js = json.loads(hint)
+            except Exception:
+                js = {"delta_market_hint": 0, "sentiment_boost": 0, "reason": "n/a"}
+
+            delta_market = (delta_val + float(js.get("delta_market_hint", 0))) / (2 if a_file and b_file else 1)
+            score = int(max(0, min(100,
+                50 + (delta_market * 22.0) + (float(js.get('sentiment_boost', 0)) * 20.0) + (usage_hint * 8.0) + (5.0 if underdog else 0.0)
+            )))
+            st.success(f"Your Plan Score: {score}/100")
+
+            # FEATURE 37: Badge Award System
+            bs = award_badges(score, float(delta_market), float(js.get("sentiment_boost", 0)), underdog,
+                              len([p for p in picks.splitlines() if p.strip()]))
+            if bs:
+                st.write("**Badges earned:**")
+                for b in bs:
+                    st.write(f"{b['emoji']} **{b['name']}** — {b['desc']}")
+
+            # FEATURE 48: Session State Management
+            from time import time as now
+            add_plan({
+                "id": f"{username}-{int(now())}",
+                "score": score,
+                "summary": js,
+                "season": SEASON,
+                "plan": {
+                    "user": username, "season": SEASON, "week": int(week),
+                    "team_focus": team_focus, "opponent": opponent,
+                    "picks": [p.strip('0123456789). ').strip() for p in picks.splitlines() if p.strip()],
+                    "rationale": rationale, "tstamp": now()
+                }
+            })
+            add_leaderboard_entry({"user": username, "week": int(week), "team": team_focus, "opp": opponent, "score": score, "reason": js.get("reason","")})
+
+    # FEATURE 38: Weekly Leaderboard Display
+    st.subheader("🏆 Weekly Leaderboard")
+    try:
+        st.dataframe(leaderboard(week=int(week)), use_container_width=True, hide_index=True)
+    except Exception:
+        st.caption("(leaderboard unavailable yet)")
+
+    # FEATURE 39: Cumulative Ladder Display
+    st.subheader("📈 Ladder (Cumulative)")
+    try:
+        st.dataframe(ladder(), use_container_width=True, hide_index=True)
+    except Exception:
+        st.caption("(ladder unavailable yet)")
+
+    # FEATURE 40: Game Mode Chat Interface
+    st.divider()
+    st.subheader("Game Mode Chat")
+
+    if "game_chat" not in st.session_state:
+        st.session_state.game_chat = []
+
+    for role, msg in st.session_state.game_chat:
+        st.chat_message(role).markdown(msg)
+
+    game_q = st.chat_input("Ask about lineup, matchups, or scoring assumptions…", key="gm_chat")
+    if game_q:
+        st.session_state.game_chat.append(("user", game_q))
+        st.chat_message("user").markdown(game_q)
+
+        # Build context: RAG + roster summary + picks/rationale
+        ctx = rag.search(game_q, k=k_ctx)
+        ctx_text = "\n\n".join([f"[{i+1}] {c['text']}" for i,(_,c) in enumerate(ctx)])
+
+        plan_text = f"Team: {team_focus} vs {opponent}\nPicks:\n{picks}\nRationale:\n{rationale}"
+        user_msg = f"""Use the context to advise fantasy lineup or game strategy.
+
+Question:
+{game_q}
+
+Roster/market context:
+{roster_context_str or '(no roster uploaded)'} 
+
+Plan context:
+{plan_text}
+
+Edge System context:
+{ctx_text}
+"""
+        with st.chat_message("assistant"):
+            ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS, temperature_val=temperature)
+            st.markdown(ans)
+            st.session_state.game_chat.append(("assistant", ans))
 
 # --------------------------------------------------------------------------------------
-# 📰 Headlines tab - SIMPLIFIED FOR DEBUGGING
+# 📰 Headlines Mode (FEATURES 41-46)
 # --------------------------------------------------------------------------------------
 with tab_news:
+    # FEATURE 41: Team News Display
     st.subheader("Latest Headlines")
-    st.info("Headlines Mode preserved but simplified for debugging")
+
+    teams_for_news = [t.strip() for t in team_codes.split(",") if t.strip()]
+    players_list = [p.strip() for p in players_raw.split(",") if p.strip()]
     
-    # Basic news test
-    if st.button("Test News AI"):
-        test_response = llm_answer("You are a fantasy expert", "Analyze recent NFL news", max_tokens=100)
-        st.write("News AI Test:")
-        st.markdown(test_response)
+    # FEATURE 43: Two-Column Layout
+    col_team, col_player = st.columns(2)
+
+    # Gather feeds once for chat + display (cached)
+    news_items, pitems = [], []
+    try:
+        news_items = cached_news(12, tuple(teams_for_news))
+    except Exception as e:
+        st.caption(f"(team/league news error: {e})")
+
+    try:
+        if players_list:
+            pitems = cached_player_news(tuple(players_list), teams_for_news[0] if teams_for_news else "", 3)
+    except Exception as e:
+        st.caption(f"(player news error: {e})")
+
+    # FEATURE 41: Team News Display
+    with col_team:
+        st.markdown("**Team / League**")
+        if not news_items:
+            st.caption("No headlines found (check team codes or refresh).")
+        for n in news_items:
+            st.write(f"**{n['title']}**")
+            if n.get("summary"):
+                # FEATURE 45: HTML Content Cleaning
+                st.caption(clean_html(n["summary"]))
+            if n.get("link"):
+                # FEATURE 44: News Source Links
+                st.markdown(f"[source]({n['link']})")
+            st.write("---")
+
+    # FEATURE 42: Player News Display
+    with col_player:
+        st.markdown("**Player Notes**")
+        if not players_list:
+            st.caption("Add player names in the sidebar to see player-specific items.")
+        elif not pitems:
+            st.caption("No player news right now.")
+        else:
+            for it in pitems:
+                st.write(f"**({it['player']}) {it['title']}**")
+                if it.get("summary"):
+                    st.caption(clean_html(it["summary"]))
+                if it.get("link"):
+                    st.markdown(f"[source]({it['link']})")
+                st.write("---")
+
+    # FEATURE 46: Headlines Chat Interface
+    st.divider()
+    st.subheader("Headlines Chat")
+
+    if "news_chat" not in st.session_state:
+        st.session_state.news_chat = []
+
+    for role, msg in st.session_state.news_chat:
+        st.chat_message(role).markdown(msg)
+
+    news_q = st.chat_input("Ask about injuries, narratives, or pressure angles…", key="news_chat_input")
+    if news_q:
+        st.session_state.news_chat.append(("user", news_q))
+        st.chat_message("user").markdown(news_q)
+
+        # Build news context text
+        team_news_txt = "\n".join([f"- {n['title']} — {clean_html(n.get('summary',''))}" for n in news_items[:10]])
+        player_news_txt = "\n".join([f"- ({it['player']}) {it['title']} — {clean_html(it.get('summary',''))}" for it in pitems[:10]])
+        ctx = rag.search(news_q, k=max(3, k_ctx//2))  # smaller RAG here
+        rag_txt = "\n\n".join([f"[{i+1}] {c['text']}" for i,(_,c) in enumerate(ctx)])
+
+        user_msg = f"""Answer using headlines + Edge System context.
+
+Question:
+{news_q}
+
+Team/League headlines:
+{team_news_txt or '(none)'}
+
+Player headlines:
+{player_news_txt or '(none)'}
+
+Edge System context:
+{rag_txt or '(none)'}
+"""
+        with st.chat_message("assistant"):
+            # FEATURE 50: Error Handling with Fallbacks
+            ans = llm_answer(SYSTEM_PROMPT, user_msg, max_tokens=MAX_TOKENS, temperature_val=temperature)
+            st.markdown(ans)
+            st.session_state.news_chat.append(("assistant", ans))
