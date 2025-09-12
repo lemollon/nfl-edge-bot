@@ -204,7 +204,7 @@ with st.sidebar:
         "AI Backend",
         options=list(AI_BACKEND_CHOICES.keys()),
         index=list(AI_BACKEND_CHOICES.keys()).index(DEFAULT_AI_BACKEND),
-        help="OpenAI provides the most reliable AI responses. Bypass mode uses expert-written responses."
+        help="AI Assistant uses GPT-3.5 for dynamic responses. Expert Mode uses proven fantasy strategies."
     )
     ai_backend = AI_BACKEND_CHOICES[ai_backend_label]
     
