@@ -226,13 +226,8 @@ with st.sidebar:
     st.divider()
     st.subheader("Model & Retrieval")
 
-    # FEATURE 18: Backend Selection
-    backend = st.selectbox(
-        "Backend (HF Inference under the hood)",
-        ["hf_inference"],
-        index=0,
-        help="This build uses Hugging Face Inference with your HUGGINGFACE_API_TOKEN."
-    )
+    # Legacy backend setting (no longer actively used)
+    backend = "openai"  # Simplified since we're using OpenAI primarily
 
     # FEATURE 10: Turbo Mode Toggle
     turbo = st.toggle("Turbo Mode (fastest)", value=False, help="Forces fastest settings + Short + k=3 and disables headlines for max speed.")
