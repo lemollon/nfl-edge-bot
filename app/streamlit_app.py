@@ -619,30 +619,54 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* NUCLEAR OPTION - FORCE ALL BACKGROUNDS DARK */
-    * {
-        background-color: transparent !important;
-        color: #ffffff !important;
-    }
-    
     /* SPECIFIC APP STRUCTURE ENFORCEMENT */
     .stApp, .stApp > div, .main, .block-container {
         background-color: #0a0a0a !important;
         color: #ffffff !important;
     }
     
-    /* SIDEBAR - NUCLEAR APPROACH */
+    /* SIDEBAR - SOLID BACKGROUNDS */
     section[data-testid="stSidebar"],
     section[data-testid="stSidebar"] > div,
     section[data-testid="stSidebar"] .stVerticalBlock,
-    section[data-testid="stSidebar"] .element-container,
-    section[data-testid="stSidebar"] > div > div,
-    section[data-testid="stSidebar"] > div > div > div {
+    section[data-testid="stSidebar"] .element-container {
         background-color: #1a1a1a !important;
         color: #ffffff !important;
     }
     
-    /* TARGET SPECIFIC WHITE CONTAINERS */
+    /* DROPDOWN MENUS - SOLID BACKGROUND FIX */
+    .stSelectbox > div > div,
+    section[data-testid="stSidebar"] .stSelectbox > div > div {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
+    }
+    
+    /* DROPDOWN OPTIONS - SOLID BACKGROUND */
+    .stSelectbox ul,
+    section[data-testid="stSidebar"] .stSelectbox ul,
+    div[role="listbox"] {
+        background-color: #262626 !important;
+        border: 1px solid #444 !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.8) !important;
+    }
+    
+    .stSelectbox li,
+    section[data-testid="stSidebar"] .stSelectbox li,
+    div[role="option"] {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        padding: 8px 12px !important;
+    }
+    
+    .stSelectbox li:hover,
+    section[data-testid="stSidebar"] .stSelectbox li:hover,
+    div[role="option"]:hover {
+        background-color: #333333 !important;
+        color: #ffffff !important;
+    }
+    
+    /* TARGET SPECIFIC CSS CLASSES FOR DROPDOWNS */
     .css-1d391kg, .css-1y4p8pa, .css-17eq0hr, .css-k1vhr4,
     .css-10trblm, .css-1629p8f, .css-16idsys, .css-1cpxqw2,
     .css-1wa3eu0, .css-12oz5g7, .css-1ekf893, .css-1v0mbdj,
@@ -653,40 +677,22 @@ st.markdown("""
         border: 1px solid #444 !important;
     }
     
-    /* AGGRESSIVE SELECTBOX FIXING */
-    .stSelectbox, .stSelectbox > div, .stSelectbox > div > div,
-    .stSelectbox > div > div > div, .stSelectbox ul, .stSelectbox li {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border-color: #444 !important;
-    }
-    
-    /* SIDEBAR SPECIFIC NUCLEAR OPTION */
-    section[data-testid="stSidebar"] * {
-        background-color: transparent !important;
-        color: #ffffff !important;
-    }
-    
-    /* OVERRIDE ANY WHITE BACKGROUNDS */
-    div[style*="background-color: white"],
-    div[style*="background-color: #ffffff"],
-    div[style*="background-color: #fff"],
-    div[style*="background: white"],
-    div[style*="background: #ffffff"],
-    div[style*="background: #fff"] {
-        background-color: #262626 !important;
-        background: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    /* FORM ELEMENTS */
-    input, textarea, select, button {
+    /* FORM ELEMENTS - SOLID BACKGROUNDS */
+    input, textarea, select {
         background-color: #262626 !important;
         color: #ffffff !important;
         border: 1px solid #444 !important;
     }
     
-    /* BUTTONS - EXCEPTION */
+    /* TEXT INPUTS */
+    .stTextInput > div > div > input,
+    section[data-testid="stSidebar"] .stTextInput > div > div > input {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
+    }
+    
+    /* BUTTONS */
     .stButton > button {
         background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
         color: #000000 !important;
@@ -732,15 +738,44 @@ st.markdown("""
         border: 1px solid #333 !important;
     }
     
+    /* CHECKBOXES AND LABELS */
+    .stCheckbox > label,
+    section[data-testid="stSidebar"] .stCheckbox > label {
+        color: #ffffff !important;
+    }
+    
+    /* SLIDERS */
+    .stSlider,
+    section[data-testid="stSidebar"] .stSlider {
+        color: #ffffff !important;
+    }
+    
+    /* OVERRIDE ANY REMAINING WHITE BACKGROUNDS */
+    div[style*="background-color: white"],
+    div[style*="background-color: #ffffff"],
+    div[style*="background-color: #fff"],
+    div[style*="background: white"],
+    div[style*="background: #ffffff"],
+    div[style*="background: #fff"] {
+        background-color: #262626 !important;
+        background: #262626 !important;
+        color: #ffffff !important;
+    }
+    
     /* HEADER HIDE */
     header[data-testid="stHeader"] {
         display: none !important;
     }
     
-    /* FINAL NUCLEAR OVERRIDE FOR ANYTHING WHITE */
-    body, html {
-        background-color: #0a0a0a !important;
+    /* FORCE WHITE TEXT WHERE NEEDED */
+    * {
         color: #ffffff !important;
+    }
+    
+    /* EXCEPTIONS - DARK TEXT ON BRIGHT BACKGROUNDS */
+    .stButton > button,
+    .stTabs [aria-selected="true"] {
+        color: #000000 !important;
     }
 </style>
 """, unsafe_allow_html=True)
