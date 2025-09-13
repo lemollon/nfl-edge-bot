@@ -953,9 +953,14 @@ with tab_coach:
         with st.chat_message("user"):
             st.markdown(coach_q)
         
-        # Get context
-        ctx = rag.search(coach_q, k=k_ctx)
-        ctx_text = "\n\n".join([f"[{i+1}] {c['text']}" for i,(_,c) in enumerate(ctx)])
+        # Get context - with error handling
+        ctx_text = ""
+        try:
+            ctx = rag.search(coach_q, k=k_ctx)
+            ctx_text = "\n\n".join([f"[{i+1}] {c['text']}" for i,(_,c) in enumerate(ctx)])
+        except Exception as e:
+            # If RAG fails, use fallback context
+            ctx_text = "Strategic analysis framework: Focus on situational football, weather conditions, and formation advantages."
         
         # Get news context
         teams = [t.strip() for t in team_codes.split(",") if t.strip()]
