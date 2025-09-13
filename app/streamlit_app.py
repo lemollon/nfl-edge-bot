@@ -724,18 +724,28 @@ st.set_page_config(
 # =============================================================================
 st.markdown("""
 <style>
-    /* GLOBAL DARK THEME */
+    /* GLOBAL DARK THEME - ENHANCED TEXT VISIBILITY */
     .stApp {
         background-color: #0a0a0a !important;
+        color: #ffffff !important;
+    }
+    
+    /* FORCE ALL TEXT TO BE WHITE */
+    * {
         color: #ffffff !important;
     }
     
     /* SIDEBAR */
     section[data-testid="stSidebar"] {
         background-color: #1a1a1a !important;
+        color: #ffffff !important;
     }
     
-    /* ENHANCED BUTTONS WITH BETTER VISIBILITY */
+    section[data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
+    
+    /* ENHANCED BUTTONS WITH MAXIMUM VISIBILITY */
     .stButton > button {
         background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
         color: #000000 !important;
@@ -751,17 +761,35 @@ st.markdown("""
         box-shadow: 0 6px 12px rgba(0,255,65,0.4) !important;
     }
     
-    /* CRITICAL FIX FOR INSTANT ANALYSIS BUTTONS */
-    .stButton button[kind="secondary"] {
+    /* FORCE BUTTON TEXT VISIBILITY */
+    .stButton > button,
+    .stButton > button span,
+    .stButton > button div,
+    .stButton > button * {
+        color: #000000 !important;
+        font-weight: bold !important;
+        text-shadow: none !important;
+    }
+    
+    /* CRITICAL - SECONDARY BUTTONS WITH DARK BACKGROUND */
+    .stButton button[kind="secondary"],
+    .stButton button:not([kind="primary"]) {
         background: #262626 !important;
         color: #ffffff !important;
         border: 2px solid #00ff41 !important;
     }
     
+    .stButton button[kind="secondary"] *,
+    .stButton button:not([kind="primary"]) * {
+        color: #ffffff !important;
+        background: transparent !important;
+    }
+    
     /* COMPREHENSIVE SELECTBOX DROPDOWN FIX */
     .stSelectbox > div > div,
     div[data-baseweb="select"] > div,
-    div[data-baseweb="select"] {
+    div[data-baseweb="select"],
+    .stSelectbox * {
         background-color: #262626 !important;
         color: #ffffff !important;
         border: 1px solid #444 !important;
@@ -792,7 +820,7 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* TABS WITH GLOW EFFECTS */
+    /* TABS WITH ENHANCED VISIBILITY */
     .stTabs [data-baseweb="tab-list"] {
         background-color: #0a0a0a !important;
     }
@@ -809,6 +837,7 @@ st.markdown("""
         background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
         color: #000000 !important;
         box-shadow: 0 0 20px rgba(0,255,65,0.5) !important;
+        font-weight: bold !important;
     }
     
     /* ANIMATED METRICS */
@@ -826,7 +855,11 @@ st.markdown("""
         box-shadow: 0 8px 16px rgba(0,255,65,0.2) !important;
     }
     
-    /* CHAT INTERFACE */
+    div[data-testid="metric-container"] * {
+        color: #ffffff !important;
+    }
+    
+    /* CHAT INTERFACE - MAXIMUM VISIBILITY */
     .stChatInput, .stChatInput input, .stChatMessage {
         background-color: #262626 !important;
         color: #ffffff !important;
@@ -834,7 +867,12 @@ st.markdown("""
         border-radius: 10px !important;
     }
     
-    /* EXPANDERS WITH GLOW */
+    .stChatMessage * {
+        color: #ffffff !important;
+        background-color: transparent !important;
+    }
+    
+    /* EXPANDERS WITH ENHANCED VISIBILITY */
     .streamlit-expanderHeader, .streamlit-expanderContent {
         background-color: #1a1a1a !important;
         color: #ffffff !important;
@@ -847,6 +885,11 @@ st.markdown("""
         box-shadow: 0 0 10px rgba(0,255,65,0.3) !important;
     }
     
+    .streamlit-expanderHeader *,
+    .streamlit-expanderContent * {
+        color: #ffffff !important;
+    }
+    
     /* TEXT INPUTS */
     .stTextInput > div > div > input {
         background-color: #262626 !important;
@@ -855,7 +898,37 @@ st.markdown("""
         border-radius: 8px !important;
     }
     
-    /* PROGRESS BARS AND ANIMATIONS */
+    .stTextInput label {
+        color: #ffffff !important;
+    }
+    
+    /* TEXT AREAS */
+    .stTextArea > div > div > textarea {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
+        border-radius: 8px !important;
+    }
+    
+    .stTextArea label {
+        color: #ffffff !important;
+    }
+    
+    /* SLIDERS */
+    .stSlider > div > div > div {
+        color: #ffffff !important;
+    }
+    
+    .stSlider label {
+        color: #ffffff !important;
+    }
+    
+    /* CHECKBOXES */
+    .stCheckbox > label {
+        color: #ffffff !important;
+    }
+    
+    /* PROGRESS BARS */
     .stProgress > div > div > div > div {
         background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
     }
@@ -864,6 +937,73 @@ st.markdown("""
     .stAlert {
         border-radius: 10px !important;
         border-left: 4px solid #00ff41 !important;
+    }
+    
+    .stSuccess {
+        background-color: #1a4d1a !important;
+        color: #ffffff !important;
+    }
+    
+    .stError {
+        background-color: #4d1a1a !important;
+        color: #ffffff !important;
+    }
+    
+    .stWarning {
+        background-color: #4d4d1a !important;
+        color: #ffffff !important;
+    }
+    
+    .stInfo {
+        background-color: #1a1a4d !important;
+        color: #ffffff !important;
+    }
+    
+    /* DATAFRAMES AND TABLES */
+    .stDataFrame {
+        color: #ffffff !important;
+    }
+    
+    .stDataFrame table {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    .stDataFrame th {
+        background-color: #333333 !important;
+        color: #ffffff !important;
+    }
+    
+    .stDataFrame td {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    /* MARKDOWN CONTENT */
+    .stMarkdown {
+        color: #ffffff !important;
+    }
+    
+    .stMarkdown * {
+        color: #ffffff !important;
+    }
+    
+    /* CONTAINER BACKGROUNDS */
+    .stContainer {
+        background-color: transparent !important;
+    }
+    
+    /* MAIN CONTENT AREA */
+    .main .block-container {
+        background-color: #0a0a0a !important;
+        color: #ffffff !important;
+    }
+    
+    /* SPECIFIC FIX FOR ERROR MESSAGES */
+    .element-container div[role="alert"] {
+        background-color: #4d1a1a !important;
+        color: #ffffff !important;
+        border: 1px solid #ff4757 !important;
     }
     
     /* HIDE STREAMLIT BRANDING */
@@ -880,6 +1020,20 @@ st.markdown("""
     
     .pulse-glow {
         animation: pulse-glow 2s infinite !important;
+    }
+    
+    /* NUCLEAR OPTION - FORCE ALL TEXT WHITE EXCEPT BUTTONS */
+    body, div, span, p, h1, h2, h3, h4, h5, h6, li, td, th, 
+    .stMarkdown, .stText, .stCaption, .stCode {
+        color: #ffffff !important;
+    }
+    
+    /* EXCEPTION - KEEP BUTTON TEXT DARK ON BRIGHT BACKGROUNDS */
+    .stTabs [aria-selected="true"],
+    .stTabs [aria-selected="true"] *,
+    .stButton > button,
+    .stButton > button * {
+        color: #000000 !important;
     }
 </style>
 """, unsafe_allow_html=True)
