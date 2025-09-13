@@ -485,122 +485,123 @@ st.set_page_config(
 # =============================================================================
 st.markdown("""
 <style>
-    /* GLOBAL DARK THEME ENFORCEMENT */
+    /* GLOBAL DARK THEME */
     .stApp {
         background-color: #0a0a0a !important;
         color: #ffffff !important;
     }
     
-    /* SPECIFIC APP STRUCTURE ENFORCEMENT */
-    .stApp, .stApp > div, .main, .block-container {
-        background-color: #0a0a0a !important;
-        color: #ffffff !important;
-    }
-    
-    /* SIDEBAR - SOLID BACKGROUNDS */
-    section[data-testid="stSidebar"],
-    section[data-testid="stSidebar"] > div,
-    section[data-testid="stSidebar"] .stVerticalBlock,
-    section[data-testid="stSidebar"] .element-container {
+    /* SIDEBAR */
+    section[data-testid="stSidebar"] {
         background-color: #1a1a1a !important;
-        color: #ffffff !important;
     }
     
-    /* NUCLEAR DROPDOWN FIX - FORCE DARK BACKGROUND AND WHITE TEXT */
-    .stSelectbox,
-    .stSelectbox *,
-    .stSelectbox > div,
-    .stSelectbox > div > div,
-    .stSelectbox > div > div > div,
-    .stSelectbox > div > div > div > div,
-    .stSelectbox ul,
-    .stSelectbox li,
-    section[data-testid="stSidebar"] .stSelectbox,
-    section[data-testid="stSidebar"] .stSelectbox *,
-    section[data-testid="stSidebar"] .stSelectbox > div,
-    section[data-testid="stSidebar"] .stSelectbox > div > div,
-    section[data-testid="stSidebar"] .stSelectbox ul,
-    section[data-testid="stSidebar"] .stSelectbox li {
+    /* EXPERT DROPDOWN FIX - TARGET REACT SELECT COMPONENTS */
+    
+    /* Main selectbox container */
+    .stSelectbox > div > div {
         background-color: #262626 !important;
-        background: #262626 !important;
         color: #ffffff !important;
         border: 1px solid #444 !important;
     }
     
-    /* DROPDOWN OPTIONS - AGGRESSIVE TARGETING */
-    div[role="listbox"],
-    div[role="option"],
-    .stSelectbox option,
-    .stSelectbox div[role="listbox"],
-    .stSelectbox div[role="option"],
-    section[data-testid="stSidebar"] div[role="listbox"],
-    section[data-testid="stSidebar"] div[role="option"] {
+    /* React Select Control */
+    .stSelectbox div[class*="control"] {
         background-color: #262626 !important;
-        background: #262626 !important;
-        color: #ffffff !important;
-        padding: 8px 12px !important;
-        border: none !important;
+        border-color: #444 !important;
     }
     
-    /* HOVER STATES */
-    .stSelectbox li:hover,
-    .stSelectbox div[role="option"]:hover,
-    div[role="option"]:hover,
-    section[data-testid="stSidebar"] .stSelectbox li:hover,
-    section[data-testid="stSidebar"] div[role="option"]:hover {
+    /* React Select Menu */
+    .stSelectbox div[class*="menu"] {
+        background-color: #262626 !important;
+        border: 1px solid #444 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.8) !important;
+        z-index: 9999 !important;
+    }
+    
+    /* React Select Options */
+    .stSelectbox div[class*="option"] {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        padding: 12px !important;
+    }
+    
+    /* React Select Option Hover */
+    .stSelectbox div[class*="option"]:hover,
+    .stSelectbox div[class*="option--is-focused"] {
         background-color: #333333 !important;
-        background: #333333 !important;
         color: #ffffff !important;
     }
     
-    /* REACT SELECT COMPONENTS - TARGET SPECIFIC CLASSES */
+    /* React Select Single Value */
+    .stSelectbox div[class*="singleValue"] {
+        color: #ffffff !important;
+    }
+    
+    /* React Select Placeholder */
+    .stSelectbox div[class*="placeholder"] {
+        color: #cccccc !important;
+    }
+    
+    /* React Select Input */
+    .stSelectbox div[class*="input"] {
+        color: #ffffff !important;
+    }
+    
+    /* Sidebar specific targeting */
+    section[data-testid="stSidebar"] .stSelectbox div[class*="control"],
+    section[data-testid="stSidebar"] .stSelectbox div[class*="menu"],
+    section[data-testid="stSidebar"] .stSelectbox div[class*="option"] {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border-color: #444 !important;
+    }
+    
+    section[data-testid="stSidebar"] .stSelectbox div[class*="option"]:hover {
+        background-color: #333333 !important;
+        color: #ffffff !important;
+    }
+    
+    /* CSS class targeting for React Select */
     .css-1wa3eu0-placeholder,
     .css-1dimb5e-singleValue,
-    .css-1uccc91-singleValue,
     .css-qc6sy-singleValue,
     .css-1pahdxg-control,
-    .css-yk16xz-control,
-    .css-1s2u09g-control,
-    .css-g0fkyu-control {
+    .css-yk16xz-control {
         background-color: #262626 !important;
         color: #ffffff !important;
+        border-color: #444 !important;
+    }
+    
+    .css-26l3qy-menu,
+    .css-1nmdiq5-menu {
+        background-color: #262626 !important;
         border: 1px solid #444 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.8) !important;
     }
     
-    /* MENU LISTS */
-    .css-11unzgr div,
-    .css-1n7v3ny-option,
-    .css-yt9ioa-option,
-    .css-9gakcf-option {
+    .css-d7l1ni-option,
+    .css-1n7v3ny-option {
         background-color: #262626 !important;
         color: #ffffff !important;
     }
     
-    /* NUCLEAR OPTION - ANY WHITE BACKGROUND BECOMES DARK */
-    *[style*="background-color: white"],
-    *[style*="background-color: #ffffff"],
-    *[style*="background-color: #fff"],
-    *[style*="background: white"],
-    *[style*="background: #ffffff"],
-    *[style*="background: #fff"] {
+    .css-d7l1ni-option:hover,
+    .css-1n7v3ny-option:hover {
+        background-color: #333333 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Nuclear option - any element with white/light background */
+    [style*="background-color: white"],
+    [style*="background-color: #fff"],
+    [style*="background-color: #ffffff"],
+    [style*="background: white"],
+    [style*="background: #fff"],
+    [style*="background: #ffffff"] {
         background-color: #262626 !important;
         background: #262626 !important;
         color: #ffffff !important;
-    }
-    
-    /* FORM ELEMENTS - SOLID BACKGROUNDS */
-    input, textarea, select {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    /* TEXT INPUTS */
-    .stTextInput > div > div > input,
-    section[data-testid="stSidebar"] .stTextInput > div > div > input {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
     }
     
     /* BUTTONS */
@@ -649,15 +650,20 @@ st.markdown("""
         border: 1px solid #333 !important;
     }
     
-    /* CHECKBOXES AND LABELS */
-    .stCheckbox > label,
-    section[data-testid="stSidebar"] .stCheckbox > label {
+    /* TEXT INPUTS */
+    .stTextInput > div > div > input {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
+    }
+    
+    /* CHECKBOXES */
+    .stCheckbox > label {
         color: #ffffff !important;
     }
     
     /* SLIDERS */
-    .stSlider,
-    section[data-testid="stSidebar"] .stSlider {
+    .stSlider {
         color: #ffffff !important;
     }
     
@@ -666,21 +672,15 @@ st.markdown("""
         display: none !important;
     }
     
-    /* FORCE WHITE TEXT GLOBALLY */
+    /* FORCE WHITE TEXT */
     * {
         color: #ffffff !important;
     }
     
-    /* EXCEPTIONS - DARK TEXT ON BRIGHT BACKGROUNDS */
+    /* BUTTON EXCEPTIONS */
     .stButton > button,
     .stTabs [aria-selected="true"] {
         color: #000000 !important;
-    }
-    
-    /* ENSURE NO TRANSPARENCY IN DROPDOWNS */
-    .stSelectbox,
-    section[data-testid="stSidebar"] .stSelectbox {
-        opacity: 1 !important;
     }
 </style>
 """, unsafe_allow_html=True)
