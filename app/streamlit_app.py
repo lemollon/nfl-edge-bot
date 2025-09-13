@@ -496,111 +496,80 @@ st.markdown("""
         background-color: #1a1a1a !important;
     }
     
-    /* EXPERT DROPDOWN FIX - TARGET REACT SELECT COMPONENTS */
+    /* STREAMLIT SELECTBOX DROPDOWN FIX - BASED ON RESEARCH */
     
-    /* Main selectbox container */
-    .stSelectbox > div > div {
+    /* The main selectbox container */
+    div[data-baseweb="select"] > div {
         background-color: #262626 !important;
         color: #ffffff !important;
         border: 1px solid #444 !important;
     }
     
-    /* React Select Control */
-    .stSelectbox div[class*="control"] {
-        background-color: #262626 !important;
-        border-color: #444 !important;
-    }
-    
-    /* React Select Menu */
-    .stSelectbox div[class*="menu"] {
+    /* The dropdown menu list */
+    div[role="listbox"] {
         background-color: #262626 !important;
         border: 1px solid #444 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.8) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.8) !important;
         z-index: 9999 !important;
     }
     
-    /* React Select Options */
-    .stSelectbox div[class*="option"] {
+    /* Individual dropdown options */
+    div[role="listbox"] li,
+    li > span {
         background-color: #262626 !important;
         color: #ffffff !important;
         padding: 12px !important;
     }
     
-    /* React Select Option Hover */
-    .stSelectbox div[class*="option"]:hover,
-    .stSelectbox div[class*="option--is-focused"] {
+    /* Hover state for dropdown options */
+    div[role="listbox"] li:hover,
+    li:hover > span {
         background-color: #333333 !important;
         color: #ffffff !important;
     }
     
-    /* React Select Single Value */
-    .stSelectbox div[class*="singleValue"] {
+    /* Additional targeting for option spans */
+    div[role="listbox"] li span,
+    div[role="option"] span {
         color: #ffffff !important;
+        background-color: transparent !important;
     }
     
-    /* React Select Placeholder */
-    .stSelectbox div[class*="placeholder"] {
-        color: #cccccc !important;
-    }
-    
-    /* React Select Input */
-    .stSelectbox div[class*="input"] {
-        color: #ffffff !important;
-    }
-    
-    /* Sidebar specific targeting */
-    section[data-testid="stSidebar"] .stSelectbox div[class*="control"],
-    section[data-testid="stSidebar"] .stSelectbox div[class*="menu"],
-    section[data-testid="stSidebar"] .stSelectbox div[class*="option"] {
+    /* Sidebar specific selectbox */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
         background-color: #262626 !important;
         color: #ffffff !important;
-        border-color: #444 !important;
+        border: 1px solid #444 !important;
     }
     
-    section[data-testid="stSidebar"] .stSelectbox div[class*="option"]:hover {
-        background-color: #333333 !important;
-        color: #ffffff !important;
-    }
-    
-    /* CSS class targeting for React Select */
-    .css-1wa3eu0-placeholder,
-    .css-1dimb5e-singleValue,
-    .css-qc6sy-singleValue,
-    .css-1pahdxg-control,
-    .css-yk16xz-control {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border-color: #444 !important;
-    }
-    
-    .css-26l3qy-menu,
-    .css-1nmdiq5-menu {
+    section[data-testid="stSidebar"] div[role="listbox"] {
         background-color: #262626 !important;
         border: 1px solid #444 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.8) !important;
     }
     
-    .css-d7l1ni-option,
-    .css-1n7v3ny-option {
+    section[data-testid="stSidebar"] div[role="listbox"] li {
         background-color: #262626 !important;
         color: #ffffff !important;
     }
     
-    .css-d7l1ni-option:hover,
-    .css-1n7v3ny-option:hover {
+    section[data-testid="stSidebar"] div[role="listbox"] li:hover {
         background-color: #333333 !important;
         color: #ffffff !important;
     }
     
-    /* Nuclear option - any element with white/light background */
-    [style*="background-color: white"],
-    [style*="background-color: #fff"],
-    [style*="background-color: #ffffff"],
-    [style*="background: white"],
-    [style*="background: #fff"],
-    [style*="background: #ffffff"] {
+    /* Nuclear option for any remaining white backgrounds */
+    [style*="background-color: white"] {
         background-color: #262626 !important;
-        background: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    [style*="background-color: #fff"] {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    [style*="background-color: #ffffff"] {
+        background-color: #262626 !important;
         color: #ffffff !important;
     }
     
