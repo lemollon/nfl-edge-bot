@@ -712,6 +712,14 @@ def comprehensive_error_check():
     
     return errors, warnings
 
+# Helper functions for community features
+def safe_hash(text):
+    """Generate safe hash for component keys"""
+    try:
+        return str(hash(text) % 10000000)
+    except:
+        return str(random.randint(1000, 9999))
+
 st.set_page_config(
     page_title="GRIT",
     page_icon="⚡",
@@ -1012,214 +1020,6 @@ st.markdown("""
         color: #000000 !important;
     }
 </style>
-""", unsafe_allow_html=True) 1px solid #333 !important;
-        border-radius: 8px 8px 0 0 !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
-        color: #000000 !important;
-        box-shadow: 0 0 20px rgba(0,255,65,0.5) !important;
-        font-weight: bold !important;
-    }
-    
-    /* ANIMATED METRICS */
-    div[data-testid="metric-container"] {
-        background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
-        border: 1px solid #444 !important;
-        color: #ffffff !important;
-        border-radius: 10px !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
-        transition: transform 0.2s ease !important;
-    }
-    
-    div[data-testid="metric-container"]:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 8px 16px rgba(0,255,65,0.2) !important;
-    }
-    
-    div[data-testid="metric-container"] * {
-        color: #ffffff !important;
-    }
-    
-    /* CHAT INTERFACE - MAXIMUM VISIBILITY */
-    .stChatInput, .stChatInput input, .stChatMessage {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-        border-radius: 10px !important;
-    }
-    
-    .stChatMessage * {
-        color: #ffffff !important;
-        background-color: transparent !important;
-    }
-    
-    /* EXPANDERS WITH ENHANCED VISIBILITY */
-    .streamlit-expanderHeader, .streamlit-expanderContent {
-        background-color: #1a1a1a !important;
-        color: #ffffff !important;
-        border: 1px solid #333 !important;
-        border-radius: 8px !important;
-    }
-    
-    .streamlit-expanderHeader:hover {
-        border-color: #00ff41 !important;
-        box-shadow: 0 0 10px rgba(0,255,65,0.3) !important;
-    }
-    
-    .streamlit-expanderHeader *,
-    .streamlit-expanderContent * {
-        color: #ffffff !important;
-    }
-    
-    /* TEXT INPUTS */
-    .stTextInput > div > div > input {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-        border-radius: 8px !important;
-    }
-    
-    .stTextInput label {
-        color: #ffffff !important;
-    }
-    
-    /* TEXT AREAS */
-    .stTextArea > div > div > textarea {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-        border-radius: 8px !important;
-    }
-    
-    .stTextArea label {
-        color: #ffffff !important;
-    }
-    
-    /* SLIDERS */
-    .stSlider > div > div > div {
-        color: #ffffff !important;
-    }
-    
-    .stSlider label {
-        color: #ffffff !important;
-    }
-    
-    /* CHECKBOXES */
-    .stCheckbox > label {
-        color: #ffffff !important;
-    }
-    
-    /* PROGRESS BARS */
-    .stProgress > div > div > div > div {
-        background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
-    }
-    
-    /* SUCCESS/ERROR/WARNING MESSAGES */
-    .stAlert {
-        border-radius: 10px !important;
-        border-left: 4px solid #00ff41 !important;
-    }
-    
-    .stSuccess {
-        background-color: #1a4d1a !important;
-        color: #ffffff !important;
-    }
-    
-    .stError {
-        background-color: #4d1a1a !important;
-        color: #ffffff !important;
-    }
-    
-    .stWarning {
-        background-color: #4d4d1a !important;
-        color: #ffffff !important;
-    }
-    
-    .stInfo {
-        background-color: #1a1a4d !important;
-        color: #ffffff !important;
-    }
-    
-    /* DATAFRAMES AND TABLES */
-    .stDataFrame {
-        color: #ffffff !important;
-    }
-    
-    .stDataFrame table {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    .stDataFrame th {
-        background-color: #333333 !important;
-        color: #ffffff !important;
-    }
-    
-    .stDataFrame td {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    /* MARKDOWN CONTENT */
-    .stMarkdown {
-        color: #ffffff !important;
-    }
-    
-    .stMarkdown * {
-        color: #ffffff !important;
-    }
-    
-    /* CONTAINER BACKGROUNDS */
-    .stContainer {
-        background-color: transparent !important;
-    }
-    
-    /* MAIN CONTENT AREA */
-    .main .block-container {
-        background-color: #0a0a0a !important;
-        color: #ffffff !important;
-    }
-    
-    /* SPECIFIC FIX FOR ERROR MESSAGES */
-    .element-container div[role="alert"] {
-        background-color: #4d1a1a !important;
-        color: #ffffff !important;
-        border: 1px solid #ff4757 !important;
-    }
-    
-    /* HIDE STREAMLIT BRANDING */
-    header[data-testid="stHeader"] {
-        display: none !important;
-    }
-    
-    /* CUSTOM ANIMATIONS */
-    @keyframes pulse-glow {
-        0% { box-shadow: 0 0 5px rgba(0,255,65,0.3); }
-        50% { box-shadow: 0 0 20px rgba(0,255,65,0.6); }
-        100% { box-shadow: 0 0 5px rgba(0,255,65,0.3); }
-    }
-    
-    .pulse-glow {
-        animation: pulse-glow 2s infinite !important;
-    }
-    
-    /* NUCLEAR OPTION - FORCE ALL TEXT WHITE EXCEPT BUTTONS */
-    body, div, span, p, h1, h2, h3, h4, h5, h6, li, td, th, 
-    .stMarkdown, .stText, .stCaption, .stCode {
-        color: #ffffff !important;
-    }
-    
-    /* EXCEPTION - KEEP BUTTON TEXT DARK ON BRIGHT BACKGROUNDS */
-    .stTabs [aria-selected="true"],
-    .stTabs [aria-selected="true"] *,
-    .stButton > button,
-    .stButton > button * {
-        color: #000000 !important;
-    }
-</style>
 """, unsafe_allow_html=True)
 
 # =============================================================================
@@ -1350,6 +1150,14 @@ with st.sidebar:
             st.success("✅ OpenAI Client Initialized")
         else:
             st.error("❌ OpenAI Client Failed")
+        
+        # Weather API status
+        weather_api_available = "OPENWEATHER_API_KEY" in st.secrets
+        if weather_api_available:
+            st.success("✅ Live Weather Data Available")
+        else:
+            st.info("💡 Add OPENWEATHER_API_KEY for live weather data")
+            st.caption("Currently using enhanced weather simulation")
     
     # AI Configuration (PRESERVED ORIGINAL)
     st.markdown("### AI Configuration")
@@ -1453,107 +1261,6 @@ with tab_coach:
     # CRITICAL USER GUIDANCE
     st.info(f"Currently analyzing: {selected_team1} vs {selected_team2} (Change teams in sidebar to analyze different matchups)")
     
-    # HOW TO USE COACH MODE (PROMINENT GUIDANCE)
-    with st.expander("Complete Coach Mode Tutorial - Start Here!", expanded=False):
-        st.markdown("""
-        # Master Coach Mode - Your Complete Strategic Analysis Guide
-        
-        ## Quick Start (30 seconds)
-        1. **Set Your Matchup** - Use sidebar to select Team 1 vs Team 2
-        2. **Choose Analysis Type** - Click any of the 4 instant analysis buttons
-        3. **Get Strategic Intel** - Review specific tactical advantages with exact percentages
-        4. **Ask Follow-ups** - Use chat for detailed strategic questions
-        
-        ---
-        
-        ## The 4 Strategic Analysis Types
-        
-        ### Edge Detection - Find Exploitable Advantages
-        **What it does:** Identifies specific tactical mismatches with success rates
-        
-        **Example Output:**
-        - "Chiefs allow 5.8 YPC on outside zone left vs their 3-4 front"
-        - "18mph wind reduces deep ball completion from 58% to 41%"
-        - "Attack backup RT with speed rushers - 73% pressure rate"
-        
-        **Best for:** Game planning, finding key strategic advantages
-        
-        ### Formation Analysis - Personnel Package Deep Dive
-        **What it does:** Shows which formations work best and why
-        
-        **You'll see:**
-        - Usage rates: "11 Personnel used 68% of snaps"
-        - Success rates: "72% conversion rate on 3rd downs"
-        - Tactical recommendations: "Focus on quick slants vs nickel"
-        
-        **Best for:** Offensive game planning, formation selection
-        
-        ### Weather Impact - Environmental Strategy
-        **What it does:** Shows how conditions affect specific plays
-        
-        **Analysis includes:**
-        - Passing efficiency changes: "-18% in 15+ mph wind"
-        - Fumble risk increases: "+12% in rain conditions"
-        - Recommended adjustments: "Increase run calls to 65%"
-        
-        **Best for:** Outdoor games, adverse conditions planning
-        
-        ### Injury Exploits - Turn Weaknesses Into Opportunities
-        **What it does:** Identifies how to attack injured/backup players
-        
-        **Strategic insights:**
-        - Backup performance vs starters: "23% drop in coverage"
-        - Specific exploits: "Attack injured RT with speed rush"
-        - Personnel recommendations: "Use TE crossing routes vs backup LB"
-        
-        **Best for:** In-game adjustments, personnel targeting
-        
-        ---
-        
-        ## Strategic Chat - Ask Like a Real Coordinator
-        
-        ### Pro-Level Questions to Ask:
-        - "How should I exploit their injured right tackle in pass protection?"
-        - "What's my best 3rd and long strategy against their Cover 2?"
-        - "How does 15mph crosswind affect my deep passing game?"
-        - "What personnel mismatches can I create in the red zone?"
-        - "How should weather change my run/pass ratio?"
-        
-        ### Question Categories:
-        - **Formation:** "Best personnel vs their nickel defense?"
-        - **Situational:** "3rd and short strategy vs their goal line stand?"
-        - **Weather:** "How does rain affect my outside zone running?"
-        - **Personnel:** "Can their safety cover our slot receiver?"
-        - **Game Plan:** "Should I establish run first or attack deep?"
-        
-        ---
-        
-        ## Pro Tips for Maximum Strategic Value
-        
-        ### 1. Be Specific with Questions
-        ❌ Bad: "How do I beat this team?"
-        ✅ Good: "How do I attack Cover 2 with bunch formations on 2nd and medium?"
-        
-        ### 2. Consider All Factors
-        - Always check weather conditions first
-        - Review injury report for opportunities
-        - Factor in down and distance tendencies
-        - Consider field position context
-        
-        ### 3. Use Multiple Analysis Types
-        - Start with Edge Detection for overview
-        - Use Formation Analysis for specific packages
-        - Check Weather Impact for conditions
-        - Review Injury Exploits for personnel advantages
-        
-        ### 4. Export Your Analysis
-        - Generate PDF reports for game planning
-        - Save key insights for reference
-        - Share analysis with your team
-        
-        **Remember:** This is NFL coordinator-level analysis. Demand the same specificity and tactical depth that real coaches use for actual game planning.
-        """)
-    
     # Quick Strategic Analysis Actions (ENHANCED WITH GAMIFICATION)
     st.markdown("### Instant Strategic Analysis")
     st.markdown("*Each analysis builds your coordinator expertise and strategic streak*")
@@ -1587,40 +1294,6 @@ with tab_coach:
             st.session_state.show_injury_exploits = True
             increment_analysis_streak()
             award_xp(25, "Injury Intelligence")
-    
-    # Add motivational progress indicator
-    st.markdown("---")
-    st.markdown("#### Strategic Development Progress")
-    
-    progress_col1, progress_col2 = st.columns(2)
-    with progress_col1:
-        streak = st.session_state.get('analysis_streak', 0)
-        next_milestone = 5 if streak < 5 else 10 if streak < 10 else 25 if streak < 25 else 50
-        if streak >= 50:
-            st.success("Maximum Streak Achieved!")
-        else:
-            progress = (streak % next_milestone) / next_milestone if streak < next_milestone else (streak - (next_milestone // 2)) / next_milestone
-            st.progress(progress)
-            st.info(f"Next milestone: {next_milestone - (streak % next_milestone) if streak < next_milestone else next_milestone - streak} more analyses")
-    
-    with progress_col2:
-        xp = st.session_state.get('coordinator_xp', 0)
-        if xp < 100:
-            next_level_xp = 100
-            level_progress = xp / 100
-        elif xp < 250:
-            next_level_xp = 250
-            level_progress = (xp - 100) / 150
-        elif xp < 500:
-            next_level_xp = 500
-            level_progress = (xp - 250) / 250
-        else:
-            next_level_xp = 1000
-            level_progress = min((xp - 500) / 500, 1.0)
-        
-        st.progress(level_progress)
-        if xp < 1000:
-            st.info(f"Next level: {next_level_xp - xp} XP needed")
     
     # Edge Detection Analysis (ENHANCED WITH EXPLANATION)
     if st.session_state.get('trigger_edge_analysis', False):
@@ -1767,26 +1440,6 @@ with tab_coach:
         with st.chat_message(role):
             st.markdown(msg)
     
-    # Enhanced example questions with XP values
-    with st.expander("Strategic Question Examples (with XP values)"):
-        st.markdown("""
-        **Formation Questions (+25 XP):**
-        - *How should I exploit their injured RT in 12 personnel?*
-        - *What's my best 3rd down strategy vs their Cover 2?*
-        
-        **Weather Questions (+20 XP):**
-        - *How does 15mph crosswind affect my deep passing game?*
-        - *Should rain change my run/pass ratio to 70/30?*
-        
-        **Personnel Questions (+30 XP):**
-        - *What personnel mismatches can I create in the red zone?*
-        - *How do I attack their backup linebacker in coverage?*
-        
-        **Situational Questions (+35 XP):**
-        - *What's my best goal line package vs their 6-1 defense?*
-        - *How should I manage the clock with a 7-point lead?*
-        """)
-    
     coach_q = st.chat_input("Ask a strategic question...")
     if coach_q:
         st.session_state.coach_chat.append(("user", coach_q))
@@ -1844,36 +1497,6 @@ with tab_coach:
                 # Award XP for strategic consultation
                 increment_analysis_streak()
                 award_xp(base_xp, f"Strategic Consultation")
-                
-                # Show XP notification
-                st.success(f"+{base_xp} XP earned for strategic consultation!")
-    
-    # Export functionality (PRESERVED)
-    st.divider()
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Generate Strategic Report PDF"):
-            if st.session_state.get("last_coach_answer"):
-                if PDF_AVAILABLE:
-                    try:
-                        pdf_data = export_edge_sheet_pdf(st.session_state["last_coach_answer"])
-                        st.download_button("Download Report", pdf_data, 
-                                         file_name=f"strategic_report_{datetime.now().strftime('%Y%m%d')}.pdf",
-                                         mime="application/pdf")
-                        st.success("Report generated!")
-                    except Exception as e:
-                        st.error(f"PDF generation failed: {e}")
-                else:
-                    st.warning("PDF export not available")
-            else:
-                st.warning("Generate analysis first")
-    
-    with col2:
-        if st.button("Share Strategic Analysis"):
-            if st.session_state.get("last_coach_answer"):
-                st.success("Strategic analysis shared!")
-            else:
-                st.warning("Generate analysis first")
 
 # =============================================================================
 # GAME MODE - COMPLETE ORIGINAL + ENHANCED COORDINATOR SIMULATOR
@@ -1881,209 +1504,6 @@ with tab_coach:
 with tab_game:
     st.markdown("## NFL Coordinator Simulator")
     st.markdown("*Test your strategic play-calling skills against real NFL scenarios*")
-    
-    # COMPREHENSIVE GAME MODE TUTORIAL
-    with st.expander("Complete Game Mode Guide - Master Coordinator Simulation", expanded=False):
-        st.markdown("""
-        # Complete Game Mode Tutorial - Become an Elite Coordinator
-        
-        ## Quick Start Guide
-        1. **Pre-Game Planning** - Set your strategic preferences and study opponent data
-        2. **Live Coordinator Challenge** - Make real-time play calls in 6 critical situations
-        3. **Performance Analysis** - Review your decisions with NFL-level feedback
-        4. **Weekly Challenges** - Submit rosters and compete on leaderboards
-        
-        ---
-        
-        ## Phase 1: Pre-Game Strategic Planning
-        
-        ### Setting Your Game Plan
-        
-        **Run/Pass Ratio Slider (30-70%):**
-        - **30-40%:** Ground-and-pound attack, control clock, weather-based
-        - **45-55%:** Balanced approach, adaptable to game flow
-        - **60-70%:** Aggressive passing attack, quick-strike capability
-        
-        **Primary Formation Selection:**
-        - **11 Personnel (3WR, 1TE, 1RB):** Most common, versatile, good vs all defenses
-        - **12 Personnel (2WR, 2TE, 1RB):** Power running, red zone specialist
-        - **21 Personnel (2WR, 1TE, 2RB):** Heavy run, short yardage, goal line
-        - **10 Personnel (4WR, 1RB):** Spread offense, passing situations, hurry-up
-        
-        **Third Down Strategy:**
-        - **Aggressive (Deep):** Target 15+ yard routes, higher reward/risk
-        - **Conservative (Short):** Quick completion, reliable but limited gain
-        - **Balanced:** Mix of route depths based on distance needed
-        
-        **Red Zone Focus:**
-        - **Power Running:** Establish physicality, control the line of scrimmage
-        - **Quick Passes:** Exploit tight coverage with precision timing
-        - **Play Action:** Use run fake to create bigger passing windows
-        
-        ---
-        
-        ## Phase 2: Live Coordinator Challenge
-        
-        ### Understanding Game Situations
-        
-        **What You'll Face:**
-        - **6 Critical Scenarios:** Different downs, distances, field positions, game states
-        - **Real-Time Pressure:** Clock management, score situations, weather factors
-        - **Opponent Adjustments:** Defense adapts to your previous calls
-        
-        ### Play Call Options & When to Use Them:
-        
-        **Power Run:**
-        - **Best for:** Short yardage, goal line, weather games, controlling clock
-        - **Success factors:** Strong O-line, physical RB, favorable weather
-        - **Avoid when:** 3rd & long, trailing late, high wind affects timing
-        
-        **Outside Zone:**
-        - **Best for:** Creating big plays, mobile RB, wearing down defense
-        - **Success factors:** Athletic line, cutback runner, pursuit angles
-        - **Avoid when:** Muddy field, disciplined edge defenders
-        
-        **Quick Slant:**
-        - **Best for:** 3rd & medium, beating press coverage, rhythm passing
-        - **Success factors:** Precise timing, vs off coverage, reliable hands
-        - **Avoid when:** Brackets on receiver, linebacker jumping routes
-        
-        **Deep Post:**
-        - **Best for:** 1st down, single safety, play action setups
-        - **Success factors:** Protection time, receiver speed, safety depth
-        - **Avoid when:** High wind, two-safety looks, heavy rush
-        
-        **Screen Pass:**
-        - **Best for:** Heavy rush, misdirection, creating space
-        - **Success factors:** Selling fake, athletic RB, downfield blocking
-        - **Avoid when:** Undisciplined rush, LB reading screen
-        
-        **Play Action:**
-        - **Best for:** Early downs, established run, deep routes
-        - **Success factors:** Credible run threat, protection schemes
-        - **Avoid when:** Obvious passing down, no run credibility
-        
-        **Draw Play:**
-        - **Best for:** Pass rush lanes, surprise element, mobile QB
-        - **Success factors:** Over-aggressive rush, delayed timing
-        - **Avoid when:** Disciplined rush lanes, expected situation
-        
-        ### Strategic Reasoning Framework:
-        
-        **Consider These Factors:**
-        1. **Down & Distance:** What does defense expect?
-        2. **Field Position:** Red zone vs open field opportunities
-        3. **Game Flow:** Leading/trailing affects risk tolerance
-        4. **Weather Conditions:** Wind/rain impacts certain plays
-        5. **Opponent Tendencies:** What have they shown?
-        6. **Personnel Matchups:** Where do you have advantages?
-        
-        ---
-        
-        ## Phase 3: Performance Analysis
-        
-        ### Grading System:
-        
-        **A Grade (75%+ Success Rate):**
-        - Elite coordinator performance
-        - Understanding of situational football
-        - Proper risk/reward assessment
-        - Weather and matchup awareness
-        
-        **B Grade (60-74% Success Rate):**
-        - Solid coordinator skills
-        - Good strategic thinking
-        - Some situational improvements needed
-        
-        **C Grade (Below 60%):**
-        - Developing coordinator
-        - Focus on down/distance awareness
-        - Study weather impact factors
-        - Review formation advantages
-        
-        ### What the Analysis Tells You:
-        
-        **Play-by-Play Breakdown:**
-        - **Situation Context:** Why this was challenging
-        - **Your Decision:** Strategic reasoning evaluation
-        - **Success Factors:** What made it work/fail
-        - **Coach Feedback:** How to improve next time
-        
-        **NFL Coach Comparisons:**
-        - See what real coordinators called in similar situations
-        - Learn from discrepancies in approach
-        - Understand different strategic philosophies
-        
-        ---
-        
-        ## Phase 4: Weekly Challenge System
-        
-        ### Roster Building Strategy:
-        
-        **Understanding Market Delta:**
-        - **Positive Delta:** Lower owned than expected performance
-        - **Negative Delta:** Higher owned than performance justifies
-        - **Strategic Value:** Find undervalued players at each position
-        
-        **Position-Specific Strategy:**
-        - **QB:** Consistency vs ceiling in different game scripts
-        - **RB:** Workload certainty vs talent in timeshares
-        - **WR:** Target share vs red zone looks vs big play ability
-        - **TE:** Floor players vs ceiling plays based on coverage
-        - **K/DST:** Matchup-based streaming vs set-and-forget
-        
-        ### Scoring Optimization:
-        - Target players with positive market deltas
-        - Consider game script and weather impacts
-        - Balance floor and ceiling based on contest type
-        - Factor in ownership for tournament play
-        
-        ---
-        
-        ## Advanced Coordinator Concepts
-        
-        ### Reading Defensive Adjustments:
-        - **If they stop your run:** Pivot to quick passes and screens
-        - **If they pressure QB:** Call more draws and hot routes
-        - **If they play deep:** Attack underneath with slants and hooks
-        - **If they bracket #1 WR:** Find secondary options and mismatches
-        
-        ### Game Flow Management:
-        - **Leading by 7+:** Control clock, limit possessions, force opponent to chase
-        - **Trailing by 7+:** Increase tempo, take shots, manage clock carefully
-        - **Close game (0-6 points):** Balanced approach, avoid major risks
-        - **Garbage time:** Statistical considerations vs actual game management
-        
-        ### Weather-Based Adjustments:
-        - **High wind:** Reduce deep attempts, increase run/screen calls
-        - **Heavy rain:** Secure ball handling, avoid outside routes
-        - **Extreme cold:** Account for reduced ball control, kicking issues
-        - **Perfect conditions:** Full playbook available, attack any weakness
-        
-        ---
-        
-        ## Becoming an Elite Coordinator
-        
-        ### Study Real NFL Tendencies:
-        - Watch how actual coordinators handle similar situations
-        - Study down-and-distance analytics from successful teams
-        - Understand how weather historically affects play-calling
-        - Learn personnel package advantages in different game states
-        
-        ### Continuous Improvement:
-        - Review your failed calls and understand why they didn't work
-        - Study opponent tendencies and adjust your approach
-        - Practice situational awareness through multiple simulations
-        - Develop contingency plans for different game scenarios
-        
-        ### Building Your Coordinator Profile:
-        - Develop your signature style (aggressive vs conservative)
-        - Master specific situations (red zone, third down, two-minute)
-        - Build expertise in weather game management
-        - Create advanced understanding of personnel mismatches
-        
-        **Remember:** Real NFL coordinators spend 60+ hours per week studying film, analyzing tendencies, and preparing for every possible scenario. The more seriously you approach this simulation, the more realistic your strategic development will be.
-        """)
     
     # Initialize coordinator simulator (NEW)
     if 'coordinator_sim' not in st.session_state:
@@ -2182,24 +1602,6 @@ with tab_game:
             </div>
             """, unsafe_allow_html=True)
             
-            if 'situation_start_time' not in st.session_state:
-                st.session_state.situation_start_time = time.time()
-            
-            elapsed_time = time.time() - st.session_state.situation_start_time
-            time_remaining = max(30 - int(elapsed_time), 0)
-            
-            if time_remaining > 0:
-                st.markdown(f"""
-                <div style="text-align: center; color: #ff4757; font-size: 1.5em; font-weight: bold;">
-                    Play Clock: {time_remaining}s
-                </div>
-                """, unsafe_allow_html=True)
-                
-                if time_remaining <= 0:
-                    st.error("Delay of Game! Auto-selecting conservative play...")
-                    selected_play = "Power Run"
-                    reasoning = "Play clock expired - default conservative call"
-                    
             col1, col2 = st.columns([2, 1])
             
             with col1:
@@ -2225,13 +1627,8 @@ with tab_game:
                 else:
                     st.success("Standard situation (+5 bonus XP)")
             
-            execute_button_text = f"Call The Play #{current_sit_idx + 1}"
-            if time_remaining <= 10:
-                execute_button_text += f" ({time_remaining}s!)"
-            
-            if st.button(execute_button_text, key=f"execute_{current_sit_idx}", 
+            if st.button(f"Call The Play #{current_sit_idx + 1}", key=f"execute_{current_sit_idx}", 
                         use_container_width=True, type="primary"):
-                st.session_state.situation_start_time = time.time()
                 
                 base_xp = 30
                 if situation['down'] == 3 and situation['distance'] > 7:
@@ -2289,13 +1686,6 @@ with tab_game:
             total_yards_gained = sum(max(0, play['result']['yards']) for play in user_plays)
             total_xp_earned = sum(play.get('xp_earned', 0) for play in user_plays)
             
-            total_time = time.time() - st.session_state.sim_start_time
-            time_bonus = max(100 - int(total_time), 0)
-            
-            if time_bonus > 0:
-                award_xp(time_bonus, f"Quick Decision Making ({int(total_time)}s)")
-                total_xp_earned += time_bonus
-            
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
@@ -2313,15 +1703,6 @@ with tab_game:
                 performance_grade = "A+" if success_rate > 80 else "A" if success_rate > 75 else "B+" if success_rate > 70 else "B" if success_rate > 60 else "C"
                 st.metric("Coordinator Grade", performance_grade, f"{total_xp_earned} XP earned")
             
-            st.markdown("### Leaderboard Impact")
-            current_rank = 5 if st.session_state.get('coordinator_xp', 0) < 500 else 4
-            if performance_grade in ['A+', 'A']:
-                new_rank = max(current_rank - 1, 1)
-                if new_rank < current_rank:
-                    st.success(f"Rank Up! You moved from #{current_rank} to #{new_rank}!")
-                else:
-                    st.info(f"Solid performance! You're holding #{current_rank}")
-            
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("New Coordinator Challenge", use_container_width=True):
@@ -2329,103 +1710,6 @@ with tab_game:
                     st.session_state.current_situation = 0
                     st.session_state.user_plays = []
                     st.rerun()
-            
-            with col2:
-                if st.button("View Detailed Analysis", use_container_width=True):
-                    st.session_state.show_detailed_breakdown = True
-    
-    # ORIGINAL Weekly Challenge System (PRESERVED COMPLETELY)
-    st.divider()
-    st.markdown("### Weekly Challenge Mode")
-    
-    try:
-        if CONFIG_AVAILABLE:
-            submission_open = is_submission_open()
-        else:
-            submission_open = True
-    except Exception as e:
-        submission_open = True
-    
-    if submission_open:
-        st.success("Submissions are Open!")
-        
-        uploaded_file = st.file_uploader("Upload roster (CSV)", type=["csv"])
-        
-        if uploaded_file is not None:
-            try:
-                roster_df = pd.read_csv(uploaded_file)
-                st.success("Roster uploaded!")
-                st.dataframe(roster_df, use_container_width=True)
-                
-                if OWNERSHIP_AVAILABLE:
-                    from ownership_scoring import normalize_roster, market_delta_by_position, delta_scalar
-                    normalized_roster = normalize_roster(roster_df)
-                    market_deltas = {}
-                    for pos in ['QB', 'RB', 'WR', 'TE', 'K', 'DST']:
-                        market_deltas[pos] = market_delta_by_position(normalized_roster, pos)
-                    total_score = sum([delta_scalar(delta, pos) for pos, delta in market_deltas.items()])
-                    
-                    st.metric("Strategic Score", f"{total_score:.1f}/100")
-                    
-                    with st.expander("Scoring Breakdown"):
-                        for pos, delta in market_deltas.items():
-                            pos_score = delta_scalar(delta, pos)
-                            st.metric(f"{pos} Edge", f"{pos_score:.1f}", f"{delta:+.2f}")
-                    
-                    if st.button("Submit Strategic Plan"):
-                        if STATE_STORE_AVAILABLE:
-                            try:
-                                from state_store import add_plan, add_leaderboard_entry
-                                add_plan(roster_df.to_dict('records'))
-                                add_leaderboard_entry({'score': total_score, 'roster': normalized_roster})
-                                if BADGES_AVAILABLE:
-                                    from badges import award_badges
-                                    award_badges(total_score)
-                            except Exception as e:
-                                st.warning(f"Storage error: {e}")
-                        
-                        st.success("Plan submitted!")
-                        st.balloons()
-                else:
-                    st.info("Scoring module not available - upload functionality preserved")
-                
-            except Exception as e:
-                st.error(f"Error: {e}")
-    else:
-        st.warning("Submissions closed")
-    
-    # ORIGINAL Leaderboard Display
-    if STATE_STORE_AVAILABLE:
-        st.divider()
-        st.markdown("### Leaderboard")
-        
-        try:
-            from state_store import leaderboard, ladder
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("**Weekly Leaders**")
-                lb = leaderboard()
-                if lb:
-                    for i, entry in enumerate(lb[:5], 1):
-                        st.metric(f"#{i}", f"{entry['score']:.1f}", 
-                                f"Week {entry.get('week', 'N/A')}")
-                else:
-                    st.info("No submissions yet")
-            
-            with col2:
-                st.markdown("**Season Ladder**")
-                season_ladder = ladder()
-                if season_ladder:
-                    for i, entry in enumerate(season_ladder[:5], 1):
-                        st.metric(f"#{i}", f"{entry['total_score']:.1f}",
-                                f"{entry['weeks']} weeks")
-                else:
-                    st.info("Season just started")
-                    
-        except Exception as e:
-            st.error(f"Leaderboard error: {e}")
 
 # =============================================================================
 # STRATEGIC NEWS WITH FULL ORIGINAL FUNCTIONALITY
@@ -2433,264 +1717,6 @@ with tab_game:
 with tab_news:
     st.markdown("## Strategic Intelligence Center")
     st.markdown("*Breaking news with tactical impact analysis*")
-    
-    # COMPREHENSIVE STRATEGIC NEWS TUTORIAL
-    with st.expander("Strategic News Mastery Guide - Intelligence Operations", expanded=False):
-        st.markdown("""
-        # Complete Strategic News Guide - Professional Intelligence Gathering
-        
-        ## Quick Start - Intelligence Officer Workflow
-        1. **Breaking Intel** - Critical tactical updates affecting game plans
-        2. **Team Analysis** - Strategic implications of team-specific news
-        3. **Player Impact** - Personnel changes and their tactical effects
-        4. **Weather Alerts** - Environmental factors requiring strategic adjustments
-        
-        ---
-        
-        ## Tab 1: Breaking Strategic Intelligence
-        
-        ### Understanding Intelligence Priority Levels:
-        
-        **Critical - Game Plan Altering:**
-        - Starting player injuries (QB, key skill positions)
-        - Extreme weather conditions (15+ mph winds, heavy precipitation)
-        - Major lineup changes announced <2 hours before game
-        - Coaching staff changes affecting play-calling
-        
-        **High - Significant Tactical Impact:**
-        - Key player questionable/probable status updates
-        - Moderate weather impacts (10-15 mph winds, light rain)
-        - Formation tendency changes identified in recent games
-        - Personnel package adjustments observed in practice
-        
-        **Medium - Tactical Considerations:**
-        - Depth chart adjustments
-        - Minor weather factors
-        - Historical performance pattern identification
-        - Strategic trend analysis
-        
-        **Low - Background Intelligence:**
-        - General team news without immediate tactical impact
-        - Long-term injury recoveries
-        - Off-season personnel moves
-        - Strategic philosophy discussions
-        
-        ### How to Process Breaking Intelligence:
-        
-        **1. Assess Immediate Impact:**
-        - Does this change starting lineups?
-        - Are key matchups affected?
-        - Do weather conditions require strategic pivots?
-        - Is there a competitive advantage to exploit?
-        
-        **2. Use Intelligence Action Buttons:**
-        - **Deep Analysis:** Get tactical breakdown of implications
-        - **Alert Team:** Notify your strategic team of critical updates
-        - **Add to Game Plan:** Integrate intelligence into strategic planning
-        
-        **3. Track Development:**
-        - Set alerts for evolving situations
-        - Monitor for additional related intelligence
-        - Update strategic assessments as situation develops
-        
-        ---
-        
-        ## Tab 2: Team Strategic Analysis
-        
-        ### Team Intelligence Categories:
-        
-        **Offensive Intelligence:**
-        - Formation usage changes week-over-week
-        - Personnel package trends and success rates
-        - Red zone efficiency pattern shifts
-        - Third down conversion strategy evolution
-        
-        **Defensive Intelligence:**
-        - Coverage shell preferences by down/distance
-        - Pass rush package deployment patterns
-        - Run defense alignment tendencies
-        - Situational substitution patterns
-        
-        **Special Teams Intelligence:**
-        - Kicking accuracy in various weather conditions
-        - Return game strategy and personnel
-        - Punt coverage and protection schemes
-        - Field goal/extra point strategic decisions
-        
-        ### Strategic Impact Assessment Framework:
-        
-        **For Each News Item, Evaluate:**
-        1. **Tactical Relevance:** Does this affect X's and O's?
-        2. **Timing Sensitivity:** When does this impact take effect?
-        3. **Competitive Advantage:** Can this intelligence create an edge?
-        4. **Game Planning Value:** Should this influence strategic decisions?
-        
-        **Impact Analysis Button Results:**
-        - **High Impact:** Major strategic adjustments recommended
-        - **Medium Impact:** Tactical awareness required, minor adjustments
-        - **Low Impact:** Background intelligence, monitor for developments
-        
-        ---
-        
-        ## Tab 3: Player Impact Intelligence
-        
-        ### Player Intelligence Hierarchy:
-        
-        **Tier 1 - Game Script Changers:**
-        - **Elite QBs:** Game plan revolves around their abilities/limitations
-        - **#1 WRs:** Coverage and game flow significantly impacted
-        - **Shutdown CBs:** Route concepts and formation choices affected
-        - **Elite Pass Rushers:** Protection schemes and quick game requirements
-        
-        **Tier 2 - High Tactical Impact:**
-        - **RB1s:** Game script and personnel package decisions
-        - **TE1s:** Red zone and formation flexibility impact
-        - **Edge defenders:** Run fit and coverage responsibilities
-        - **Safety coverage:** Deep ball and run support balance
-        
-        **Tier 3 - Situational Impact:**
-        - **Slot receivers:** Third down and red zone packages
-        - **Nickel defenders:** Personnel matchup considerations
-        - **Special teams aces:** Coverage and return game
-        - **Backup linemen:** Protection and running lane integrity
-        
-        ### Player Impact Analysis Process:
-        
-        **When Player News Breaks:**
-        1. **Identify Position Impact:** How does this affect unit performance?
-        2. **Assess Replacement Quality:** Significant drop-off vs seamless transition?
-        3. **Strategic Opportunities:** Can opponent weaknesses be exploited?
-        4. **Game Plan Adjustments:** Do personnel packages need modification?
-        
-        **Strategic Impact Categories:**
-        - **Elite Impact:** Fundamental game planning changes required
-        - **High Impact:** Specific tactical adjustments needed
-        - **Moderate Impact:** Situational awareness and minor tweaks
-        - **Monitor Status:** Track developments without immediate changes
-        
-        ---
-        
-        ## Tab 4: Weather Strategic Alerts
-        
-        ### Weather Intelligence Matrix:
-        
-        **Temperature Impact Analysis:**
-        - **Below 32°F:** Ball handling concerns, reduced kicking accuracy
-        - **32-45°F:** Potential grip issues, increased fumble risk
-        - **45-65°F:** Optimal conditions for all aspects
-        - **65-80°F:** Standard performance expectations
-        - **Above 80°F:** Hydration and conditioning factors
-        
-        **Wind Impact Assessment:**
-        - **0-7 mph:** Negligible impact on strategy
-        - **8-12 mph:** Monitor for directional changes, minor adjustments
-        - **13-18 mph:** Significant passing game impact, strategic pivots needed
-        - **19-25 mph:** Major game plan alterations required
-        - **25+ mph:** Extreme conditions, fundamental strategy overhaul
-        
-        **Precipitation Strategic Factors:**
-        - **Light Rain (0-20%):** Minimal impact, monitor field conditions
-        - **Moderate Rain (21-50%):** Ball security emphasis, grip considerations
-        - **Heavy Rain (51%+):** Major strategy adjustment, ground game focus
-        - **Snow:** Visual impairment, footing concerns, extreme weather protocols
-        
-        ### Historical Weather Performance Analysis:
-        
-        **Wind Alerts:**
-        - Teams average 24% fewer passing yards in 15+ mph winds
-        - Deep ball completion drops from 58% to 41% in crosswinds
-        - Field goal accuracy decreases 18% beyond 40 yards in high wind
-        
-        **Temperature Alerts:**
-        - Fumble rates increase 18% in games below 30°F
-        - Passing accuracy drops 12% in extreme cold conditions
-        - Running back productivity increases 8% in cold weather games
-        
-        **Precipitation Alerts:**
-        - Turnover rates increase 31% in wet conditions
-        - Passing attempts decrease average 22% in rain games
-        - Ground game usage increases 28% during precipitation
-        
-        ### Strategic Weather Adjustment Protocols:
-        
-        **High Wind Adjustments:**
-        - Reduce deep passing attempts by 40-50%
-        - Increase screen and quick game calls
-        - Emphasize running game and ball control
-        - Adjust special teams strategy (punting direction, FG attempts)
-        
-        **Cold Weather Adjustments:**
-        - Increase ball security emphasis in pre-game preparation
-        - Modify protection schemes for reduced grip
-        - Adjust kicking game expectations and strategy
-        - Prepare for potential overtime implications
-        
-        **Wet Conditions Adjustments:**
-        - Emphasize ground game and short passing
-        - Increase fumble prevention focus
-        - Adjust route concepts for secure catches
-        - Modify defensive alignment for run stopping
-        
-        ---
-        
-        ## Strategic News Analysis Chat
-        
-        ### Professional News Analysis Questions:
-        
-        **Injury Impact Analysis:**
-        - "How does [Player X's] injury affect their red zone packages?"
-        - "What tactical adjustments should [Team] make without their starting RT?"
-        - "How can [Opponent] exploit the backup safety in coverage?"
-        
-        **Weather Strategic Planning:**
-        - "How should 18mph crosswinds change my deep passing strategy?"
-        - "What's the historical impact of rain on this team's offensive approach?"
-        - "How does cold weather affect field goal range decisions?"
-        
-        **Formation and Personnel:**
-        - "How does [Team's] increased 12 personnel usage affect defensive strategy?"
-        - "What coverage adjustments counter their new slot receiver usage?"
-        - "How should we attack their depleted linebacker corps?"
-        
-        **Game Flow and Strategy:**
-        - "How does [QB's] mobility limitation affect two-minute drill strategy?"
-        - "What red zone adjustments counter their improved goal line defense?"
-        - "How does their new coordinator's background affect play-calling tendencies?"
-        
-        ### Intelligence Evaluation Standards:
-        
-        **Quality Strategic Analysis Should Include:**
-        - ✅ Specific tactical implications with percentages
-        - ✅ Personnel and formation considerations
-        - ✅ Historical context and trend analysis
-        - ✅ Actionable strategic recommendations
-        - ✅ Risk assessment and contingency planning
-        
-        **Request Deeper Analysis If Response Lacks:**
-        - ❌ Specific tactical details or success rates
-        - ❌ Context of how this affects game planning
-        - ❌ Comparison to historical similar situations
-        - ❌ Clear strategic recommendations
-        - ❌ Assessment of competitive advantage implications
-        
-        ---
-        
-        ## Professional Intelligence Officer Standards
-        
-        ### Daily Intelligence Routine:
-        1. **Morning Brief (6-8 AM):** Review overnight developments
-        2. **Midday Update (12-2 PM):** Process practice reports and injury news
-        3. **Evening Analysis (6-8 PM):** Final intelligence gathering and analysis
-        4. **Game Day Protocol:** Continuous monitoring and real-time adjustments
-        
-        ### Intelligence Network Management:
-        - Set alerts for critical player and team developments
-        - Monitor multiple sources for confirmation and context
-        - Maintain intelligence files on key opponents and personnel
-        - Develop relationships with reliable information sources
-        
-        **Remember:** Professional intelligence gathering is about turning information into actionable competitive advantages. The goal is not just to know what happened, but to understand how it affects strategic decision-making and game planning.
-        """)
     
     news_tabs = st.tabs(["Breaking Intel", "Team Analysis", "Player Impact", "Weather Alerts"])
     
@@ -2737,7 +1763,7 @@ with tab_news:
                 
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    if st.button("🔬 Deep Analysis", key=f"deep_{hash(intel['title'])}"):
+                    if st.button("🔬 Deep Analysis", key=f"deep_{safe_hash(intel['title'])}"):
                         if intel['category'] == 'injury':
                             st.info("🏥 Injury creates 23% drop in red zone efficiency. Recommend power running packages.")
                         elif intel['category'] == 'weather':
@@ -2746,11 +1772,11 @@ with tab_news:
                             st.info("📊 Comprehensive trend analysis available in Coach Mode.")
                 
                 with col2:
-                    if st.button("📤 Alert Team", key=f"alert_{hash(intel['title'])}"):
+                    if st.button("📤 Alert Team", key=f"alert_{safe_hash(intel['title'])}"):
                         st.success("📱 Strategic alert sent to coaching staff!")
                 
                 with col3:
-                    if st.button("📋 Add to Game Plan", key=f"plan_{hash(intel['title'])}"):
+                    if st.button("📋 Add to Game Plan", key=f"plan_{safe_hash(intel['title'])}"):
                         st.success("✅ Added to strategic considerations!")
     
     with news_tabs[1]:
@@ -2877,361 +1903,6 @@ with tab_community:
     st.markdown("## Strategic Minds Network")
     st.markdown("*Connect with elite strategic analysts worldwide*")
     
-    # COMPREHENSIVE COMMUNITY TUTORIAL
-    with st.expander("Strategic Minds Network Guide - Elite Analyst Community", expanded=False):
-        st.markdown("""
-        # Complete Community Guide - Strategic Minds Network
-        
-        ## Quick Start - Join the Elite Analyst Community
-        1. **Strategic Feed** - Share insights and engage with top analysts
-        2. **Analyst Rankings** - Track your performance against elite minds
-        3. **My Analysis** - Build your strategic prediction portfolio
-        4. **Learning Center** - Develop professional-level analytical skills
-        
-        ---
-        
-        ## Tab 1: Strategic Analyst Feed
-        
-        ### Understanding the Network:
-        
-        **Community Stats Overview:**
-        - **4,247 Strategic Analysts:** Global network of football minds
-        - **628 Daily Predictions:** Active analysis and forecasting
-        - **76.3% Average Accuracy:** High-level analytical standards
-        - **89 Elite Analysts:** Top-tier certified strategic minds
-        
-        ### Sharing Strategic Insights:
-        
-        **Insight Types & Best Practices:**
-        
-        **Formation Analysis:**
-        - Share specific formation vs coverage success rates
-        - Include personnel package effectiveness data
-        - Provide tactical reasoning with supporting statistics
-        - Example: "Chiefs 11 personnel vs Eagles nickel: 73% success rate on quick slants"
-        
-        **Weather Impact:**
-        - Provide historical weather correlation data
-        - Include specific percentage impacts on play types
-        - Offer strategic adjustment recommendations
-        - Example: "18mph crosswind reduces deep ball completion by 27%"
-        
-        **Personnel Mismatch:**
-        - Identify specific player vs player advantages
-        - Include success rate data for matchups
-        - Provide exploitation strategies
-        - Example: "Kelce vs LB coverage creates 8.3 YAC average"
-        
-        **Situational Tendency:**
-        - Share down/distance or game state patterns
-        - Include historical success rate analysis
-        - Provide strategic counters and adjustments
-        - Example: "Eagles red zone defense allows 67% success on power runs"
-        
-        ### Engagement Quality Standards:
-        
-        **High-Value Insights Include:**
-        - ✅ Specific statistical evidence (percentages, rates, averages)
-        - ✅ Tactical reasoning and strategic implications
-        - ✅ Actionable recommendations for exploitation
-        - ✅ Context for when/how to apply the insight
-        - ✅ Risk assessment and contingency considerations
-        
-        **Avoid Low-Quality Posts:**
-        - ❌ Generic opinions without supporting data
-        - ❌ Vague observations without tactical implications
-        - ❌ Predictions without analytical reasoning
-        - ❌ Personal attacks or non-strategic commentary
-        
-        ### Network Interaction Protocol:
-        
-        **Like System:**
-        - Reward high-quality strategic analysis
-        - Support insights that provide tactical value
-        - Recognize innovative analytical approaches
-        
-        **Share Function:**
-        - Amplify exceptional strategic insights
-        - Build network reach for valuable analysis
-        - Create strategic discussion threads
-        
-        **Discussion Threads:**
-        - Engage in professional strategic debate
-        - Challenge analysis with counter-evidence
-        - Build collaborative analytical understanding
-        
-        **Challenge System:**
-        - Request counter-analysis for alternative perspectives
-        - Test strategic assumptions with peer review
-        - Develop more robust analytical frameworks
-        
-        ---
-        
-        ## Tab 2: Elite Analyst Rankings
-        
-        ### Ranking System Methodology:
-        
-        **Performance Metrics:**
-        - **Accuracy Rate:** Percentage of correct strategic predictions
-        - **Prediction Volume:** Total strategic analyses submitted
-        - **Specialty Recognition:** Certified expertise in strategic areas
-        - **Network Impact:** Community engagement and influence
-        
-        ### Ranking Tiers & Requirements:
-        
-        **Elite Tier (Top 3):**
-        - **Accuracy:** 92%+ prediction success rate
-        - **Volume:** 600+ strategic predictions submitted
-        - **Expertise:** Multiple certified strategic specializations
-        - **Recognition:** Community-validated analytical excellence
-        
-        **Professional Tier (Top 10):**
-        - **Accuracy:** 87%+ prediction success rate
-        - **Volume:** 400+ strategic predictions submitted
-        - **Expertise:** At least one certified specialization
-        - **Contribution:** Regular high-quality strategic insights
-        
-        **Rising Analyst Tier (Top 50):**
-        - **Accuracy:** 80%+ prediction success rate
-        - **Volume:** 150+ strategic predictions submitted
-        - **Development:** Active participation in learning programs
-        - **Potential:** Demonstrated analytical improvement trend
-        
-        **Developing Analyst (Everyone Else):**
-        - **Focus:** Building analytical skills and track record
-        - **Goal:** Achieve consistent strategic prediction accuracy
-        - **Support:** Access to learning center and mentorship
-        
-        ### Specialty Certifications:
-        
-        **Formation Analysis Master:**
-        - Deep understanding of personnel package advantages
-        - Ability to identify formation vs coverage mismatches
-        - Expertise in situational formation deployment
-        
-        **Weather Strategy Expert:**
-        - Mastery of environmental impact on game strategy
-        - Historical weather correlation analysis skills
-        - Strategic adjustment recommendation capabilities
-        
-        **Situational Football Master:**
-        - Expertise in down/distance strategic analysis
-        - Red zone and goal line tactical specialization
-        - Clock management and game state optimization
-        
-        **Personnel Strategy Pro:**
-        - Advanced player matchup analysis capabilities
-        - Injury impact and depth chart exploitation expertise
-        - Strategic personnel package recommendation skills
-        
-        ### Advancement Pathway:
-        
-        **Building Your Ranking:**
-        1. **Submit Quality Predictions:** Focus on accuracy over volume
-        2. **Develop Specializations:** Master specific strategic areas
-        3. **Engage Professionally:** Contribute valuable insights to community
-        4. **Continuous Learning:** Complete certification programs
-        5. **Peer Recognition:** Build reputation through consistent excellence
-        
-        ---
-        
-        ## Tab 3: My Strategic Analysis Portfolio
-        
-        ### Building Your Prediction Portfolio:
-        
-        **Prediction Categories:**
-        
-        **Game Outcome Predictions:**
-        - Final score predictions with strategic reasoning
-        - Key statistical performance forecasts
-        - Game flow and script predictions
-        - Tactical matchup outcome analysis
-        
-        **Statistical Performance:**
-        - Individual player statistical forecasts
-        - Team performance metric predictions
-        - Efficiency and success rate projections
-        - Historical trend continuation analysis
-        
-        **Weather Impact:**
-        - Environmental factor effect predictions
-        - Weather-adjusted performance forecasting
-        - Strategic adaptation success projections
-        - Historical weather correlation analysis
-        
-        **Formation Success:**
-        - Personnel package effectiveness predictions
-        - Formation vs coverage success rate forecasts
-        - Situational deployment outcome projections
-        - Tactical adjustment effectiveness analysis
-        
-        ### Professional Prediction Framework:
-        
-        **Strategic Analysis Requirements:**
-        - **Detailed Reasoning:** Explain tactical logic behind prediction
-        - **Supporting Evidence:** Provide statistical and historical support
-        - **Risk Assessment:** Acknowledge potential variables and uncertainties
-        - **Confidence Scaling:** Assign appropriate confidence levels (1-10)
-        - **Expected Outcomes:** Specify measurable prediction criteria
-        
-        **Quality Prediction Example:**
-        ```
-        Prediction Type: Game Outcome
-        Matchup: Chiefs vs Eagles
-        
-        Strategic Analysis: "Chiefs will win 28-21 based on three tactical advantages:
-        1. Eagles' injured RT creates 73% pressure rate vulnerability vs Chiefs' speed rush
-        2. 18mph crosswind reduces Eagles' deep ball success from 58% to 41%
-        3. Chiefs' 12 personnel vs Eagles' nickel creates +2.1 YPC advantage in red zone
-        
-        Expected measurable outcomes: Mahomes 285+ passing, 65%+ completion rate,
-        Chiefs 140+ rushing yards, Eagles <1 deep completion, 2+ sacks of Hurts"
-        
-        Confidence: 8/10
-        Risk Factors: Weather could worsen, Chiefs historically slow starts
-        ```
-        
-        ### Portfolio Performance Tracking:
-        
-        **Success Metrics:**
-        - **Overall Accuracy:** Percentage of correct strategic predictions
-        - **Category Expertise:** Success rates by prediction type
-        - **Confidence Calibration:** Accuracy correlation with confidence levels
-        - **Strategic Development:** Improvement trends over time
-        
-        **Performance Analysis:**
-        - **Strengths Identification:** Areas of analytical excellence
-        - **Improvement Areas:** Categories requiring additional focus
-        - **Strategic Evolution:** Development of analytical sophistication
-        - **Network Position:** Ranking progression and peer comparison
-        
-        ---
-        
-        ## Tab 4: Strategic Learning Center
-        
-        ### Professional Development Pathway:
-        
-        **Certification Programs Available:**
-        
-        **Formation Analysis Mastery:**
-        ```
-        Curriculum:
-        - Personnel package identification and deployment
-        - Formation vs coverage matchup analysis
-        - Down/distance formation selection optimization
-        - Weather impact on formation effectiveness
-        - Historical formation success rate analysis
-        
-        Certification Requirements:
-        - Pass comprehensive formation analysis exam
-        - Submit 3 detailed formation analysis case studies
-        - Demonstrate 85%+ accuracy on formation predictions
-        - Complete peer review process with established experts
-        ```
-        
-        **Weather Impact Specialization:**
-        ```
-        Curriculum:
-        - Environmental factor impact quantification
-        - Historical weather correlation analysis
-        - Strategic adjustment protocol development
-        - Game script modification for weather conditions
-        - Special teams weather impact assessment
-        
-        Certification Requirements:
-        - Master weather impact calculation methodologies
-        - Develop weather-based strategic adjustment frameworks
-        - Achieve 90%+ accuracy on weather impact predictions
-        - Complete weather strategy case study portfolio
-        ```
-        
-        **Situational Football Expertise:**
-        ```
-        Curriculum:
-        - Down/distance strategic analysis
-        - Red zone tactical optimization
-        - Clock management decision framework
-        - Game state strategic adaptation
-        - Historical situational success pattern analysis
-        
-        Certification Requirements:
-        - Demonstrate mastery of situational strategic concepts
-        - Build comprehensive situational strategy playbook
-        - Achieve expert-level situational prediction accuracy
-        - Mentor developing analysts in situational analysis
-        ```
-        
-        **Personnel Matchup Analysis:**
-        ```
-        Curriculum:
-        - Individual player strength/weakness assessment
-        - Matchup advantage identification methodology
-        - Injury impact strategic analysis
-        - Depth chart exploitation strategies
-        - Personnel-based game planning frameworks
-        
-        Certification Requirements:
-        - Master personnel evaluation methodologies
-        - Develop personnel-based strategic recommendations
-        - Achieve 88%+ accuracy on matchup predictions
-        - Complete advanced personnel strategy practicum
-        ```
-        
-        ### Learning Resources:
-        
-        **Study Materials:**
-        - Historical game analysis case studies
-        - Strategic decision-making frameworks
-        - Advanced statistical analysis methodologies
-        - Professional coordinator interview insights
-        
-        **Practice Simulations:**
-        - Real-time strategic decision scenarios
-        - Historical situation recreation and analysis
-        - Peer collaboration on strategic challenges
-        - Mentor-guided analytical skill development
-        
-        **Assessment Methods:**
-        - Comprehensive written examinations
-        - Practical strategic analysis demonstrations
-        - Peer review and feedback sessions
-        - Real-world prediction accuracy evaluation
-        
-        ### Professional Development Benefits:
-        
-        **Career Enhancement:**
-        - Recognition as certified strategic expert
-        - Network access to professional coaching contacts
-        - Opportunities for consultant and analyst positions
-        - Advanced strategic analysis skill validation
-        
-        **Community Status:**
-        - Elevated ranking and reputation within network
-        - Mentorship opportunities for developing analysts
-        - Priority access to advanced learning opportunities
-        - Recognition as subject matter expert
-        
-        ---
-        
-        ## Excellence Standards - Strategic Minds Network
-        
-        ### Professional Conduct Code:
-        - Maintain high standards of analytical integrity
-        - Support community learning and development
-        - Share knowledge and expertise generously
-        - Challenge ideas respectfully and constructively
-        - Uphold accuracy and evidence-based analysis standards
-        
-        ### Community Contribution Expectations:
-        - Regular participation in strategic discussions
-        - Mentorship support for developing analysts
-        - Quality insight sharing and network building
-        - Professional development and continuous learning
-        - Positive representation of strategic analysis profession
-        
-        **Remember:** The Strategic Minds Network is a professional community of elite football analysts. Success requires dedication to analytical excellence, continuous learning, and meaningful contribution to the collective strategic knowledge base.
-        """)
-    
     # Enhanced community stats (NEW)
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -3324,18 +1995,18 @@ with tab_community:
                 
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
-                    if st.button(f"👍 Like", key=f"like_{hash(post['content'])}"):
+                    if st.button(f"👍 Like", key=f"like_{safe_hash(post['content'])}"):
                         post['likes'] += 1
                         st.success("Insight liked!")
                 with col2:
-                    if st.button(f"📤 Share", key=f"share_{hash(post['content'])}"):
+                    if st.button(f"📤 Share", key=f"share_{safe_hash(post['content'])}"):
                         post['shares'] += 1
                         st.success("Shared to network!")
                 with col3:
-                    if st.button(f"💬 Discuss", key=f"discuss_{hash(post['content'])}"):
+                    if st.button(f"💬 Discuss", key=f"discuss_{safe_hash(post['content'])}"):
                         st.info("Discussion thread opened")
                 with col4:
-                    if st.button(f"🧠 Challenge", key=f"challenge_{hash(post['content'])}"):
+                    if st.button(f"🧠 Challenge", key=f"challenge_{safe_hash(post['content'])}"):
                         st.warning("Counter-analysis requested")
     
     with social_tabs[1]:
@@ -3343,71 +2014,6 @@ with tab_community:
         
         # Display the competitive leaderboard
         create_strategic_leaderboard()
-        
-        st.markdown("---")
-        st.markdown("#### Ranking System Breakdown")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("""
-            **Ranking Factors:**
-            - Strategic Analysis XP
-            - Analysis Streak Length  
-            - Prediction Accuracy
-            - Community Engagement
-            """)
-        
-        with col2:
-            st.markdown("""
-            **Level Requirements:**
-            - Rookie Analyst: 0-99 XP
-            - Assistant Coach: 100-249 XP
-            - Position Coach: 250-499 XP  
-            - Coordinator: 500-999 XP
-            - Head Coach: 1000-1999 XP
-            - Belichick Level: 2000+ XP
-            """)
-        
-        # Enhanced leaderboard with original functionality preserved
-        elite_analysts = [
-            {"rank": 1, "user": "BelichickStudy_Pro", "accuracy": "94.7%", "predictions": 847, "specialty": "Formation Analysis", "xp": 2847},
-            {"rank": 2, "user": "WeatherMaster_NFL", "accuracy": "93.2%", "predictions": 623, "specialty": "Weather Impact", "xp": 2134},
-            {"rank": 3, "user": "RedZone_Genius", "accuracy": "92.8%", "predictions": 1205, "specialty": "Situational Football", "xp": 1892},
-            {"rank": 4, "user": "PersonnelExpert", "accuracy": "91.9%", "predictions": 789, "specialty": "Matchup Analysis", "xp": 1647},
-            {"rank": 5, "user": "You", "accuracy": "76.2%", "predictions": 67, "specialty": "Developing", "xp": st.session_state.get('coordinator_xp', 0)}
-        ]
-        
-        st.markdown("### Detailed Analyst Profiles")
-        
-        for analyst in elite_analysts:
-            with st.expander(f"#{analyst['rank']} {analyst['user']} - {analyst['accuracy']} accuracy"):
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.metric("Total XP", f"{analyst['xp']:,}")
-                    st.metric("Predictions Made", analyst['predictions'])
-                
-                with col2:
-                    st.metric("Accuracy Rate", analyst['accuracy'])
-                    st.metric("Specialty", analyst['specialty'])
-                
-                with col3:
-                    if analyst['user'] == "You":
-                        next_rank_xp = 500 if analyst['xp'] < 500 else 1000 if analyst['xp'] < 1000 else 2000
-                        st.metric("Next Rank", f"{next_rank_xp - analyst['xp']} XP needed")
-                        st.progress(min(analyst['xp'] / next_rank_xp, 1.0))
-                    else:
-                        rank_colors = {1: "🥇", 2: "🥈", 3: "🥉", 4: "⭐", 5: "🚀"}
-                        st.metric("Status", f"{rank_colors.get(analyst['rank'], '📊')} Elite Analyst")
-        
-        # Motivational call-to-action
-        your_xp = st.session_state.get('coordinator_xp', 0)
-        if your_xp < 500:
-            st.info("Complete more strategic analyses to climb the rankings! Each analysis builds your expertise.")
-        elif your_xp < 1000:
-            st.warning("You're in the top tier! Keep analyzing to reach elite coordinator status.")
-        else:
-            st.success("You've reached elite status! Maintain your position through consistent analysis.")
     
     with social_tabs[2]:
         st.markdown("### My Strategic Analysis")
@@ -3559,10 +2165,8 @@ status_col1, status_col2, status_col3, status_col4 = st.columns(4)
 with status_col1:
     if OPENAI_AVAILABLE:
         ai_status = "✅ GPT-3.5 Active"
-        status_color = "#00ff41"
     else:
         ai_status = "🔄 Fallback Mode"
-        status_color = "#ff6b35"
     st.metric("Strategic AI", ai_status)
 
 with status_col2:
@@ -3626,41 +2230,6 @@ if user_xp > 0 or user_streak > 0:
     with achievement_cols[4]:
         next_achievement = "🎯 Complete 5 analyses" if user_streak < 5 else "⭐ Reach 25 streak" if user_streak < 25 else "🏆 Master all modes"
         st.markdown(f"🔮 **Next Goal**<br>{next_achievement}", unsafe_allow_html=True)
-
-# ORIGINAL Advanced Features (PRESERVED WITH GAMIFICATION)
-if st.checkbox("Advanced Strategic Tools"):
-    st.markdown("### Professional Coordinator Tools")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("**Advanced Analytics:** Formation success matrices, weather correlation analysis, personnel efficiency tracking")
-        if st.button("Launch Pro Analytics"):
-            st.info("Professional analytics dashboard - Formation success: 73.2% vs league 68.1%")
-            award_xp(50, "Pro Analytics Usage")
-    
-    with col2:
-        st.markdown("**Coach Integration:** Export game plans, sync with film study, connect coaching tools")
-        if st.button("Integration Hub"):
-            st.info("Professional coaching integration - 12 NFL teams using platform")
-            award_xp(40, "Professional Integration")
-
-# ORIGINAL Debug Information (PRESERVED)
-if st.checkbox("System Diagnostics"):
-    debug_info = {
-        "OpenAI": "✅ Connected" if OPENAI_AVAILABLE else "❌ Disconnected",
-        "RAG System": "✅ Active" if RAG_AVAILABLE else "🟡 Mock Mode",
-        "Strategic Data": "✅ Loaded",
-        "Weather System": "✅ Active",
-        "Injury Database": "✅ Current",
-        "Feeds Available": "✅ Active" if FEEDS_AVAILABLE else "🟡 Mock Mode",
-        "Player News": "✅ Active" if PLAYER_NEWS_AVAILABLE else "🟡 Mock Mode",
-        "PDF Export": "✅ Available" if PDF_AVAILABLE else "❌ Unavailable",
-        "State Store": "✅ Available" if STATE_STORE_AVAILABLE else "❌ Unavailable",
-        "Ownership Scoring": "✅ Available" if OWNERSHIP_AVAILABLE else "❌ Unavailable",
-        "Badges System": "✅ Available" if BADGES_AVAILABLE else "❌ Unavailable",
-        "Modules Loaded": f"{sum([RAG_AVAILABLE, FEEDS_AVAILABLE, CONFIG_AVAILABLE, PDF_AVAILABLE, PLAYER_NEWS_AVAILABLE, STATE_STORE_AVAILABLE, OWNERSHIP_AVAILABLE, BADGES_AVAILABLE])}/8 available"
-    }
-    st.json(debug_info)
 
 # Enhanced Platform Information with user motivation
 st.markdown(f"""
