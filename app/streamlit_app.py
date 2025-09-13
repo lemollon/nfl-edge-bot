@@ -479,8 +479,88 @@ class NFLCoordinatorSimulator:
         return analysis
 
 # =============================================================================
-# STREAMLIT CONFIGURATION
+# COMPREHENSIVE ERROR CHECKING AND DEBUGGING SYSTEM
 # =============================================================================
+def safe_get_session_value(key, default=""):
+    """Safely get session state values with fallbacks"""
+    try:
+        return st.session_state.get(key, default)
+    except Exception as e:
+        st.error(f"Session state error for {key}: {e}")
+        return default
+
+def validate_string_input(value, field_name, default=""):
+    """Validate string inputs with proper error handling"""
+    try:
+        if value is None:
+            st.warning(f"⚠️ {field_name} is None, using default: '{default}'")
+            return default
+        if not isinstance(value, str):
+            st.warning(f"⚠️ {field_name} is not a string ({type(value)}), converting...")
+            return str(value)
+        return value
+    except Exception as e:
+        st.error(f"❌ Error validating {field_name}: {e}")
+        return default
+
+def debug_dropdown_css():
+    """Debug dropdown styling issues"""
+    st.markdown("""
+    <script>
+    // Debug dropdown elements
+    setTimeout(function() {
+        console.log("=== DROPDOWN DEBUG ===");
+        
+        // Find all selectbox elements
+        const selectboxes = document.querySelectorAll('.stSelectbox');
+        console.log("Selectboxes found:", selectboxes.length);
+        
+        // Find all select elements
+        const selects = document.querySelectorAll('[data-baseweb="select"]');
+        console.log("Select elements found:", selects.length);
+        
+        // Find all listbox elements
+        const listboxes = document.querySelectorAll('[role="listbox"]');
+        console.log("Listboxes found:", listboxes.length);
+        
+        // Log background colors
+        selectboxes.forEach((el, i) => {
+            const computed = window.getComputedStyle(el);
+            console.log(`Selectbox ${i} background:`, computed.backgroundColor);
+        });
+        
+    }, 1000);
+    </script>
+    """, unsafe_allow_html=True)
+
+def comprehensive_error_check():
+    """Comprehensive system error checking"""
+    errors = []
+    warnings = []
+    
+    # Check required variables
+    try:
+        if 'NFL_TEAMS' not in globals():
+            errors.append("NFL_TEAMS dictionary not defined")
+        elif not NFL_TEAMS:
+            errors.append("NFL_TEAMS dictionary is empty")
+            
+        if 'OPENAI_CLIENT' not in globals():
+            warnings.append("OPENAI_CLIENT not initialized")
+            
+        # Check session state
+        if 'selected_team1' not in st.session_state:
+            st.session_state.selected_team1 = "Kansas City Chiefs"
+            warnings.append("selected_team1 not in session state, setting default")
+            
+        if 'selected_team2' not in st.session_state:
+            st.session_state.selected_team2 = "Philadelphia Eagles" 
+            warnings.append("selected_team2 not in session state, setting default")
+            
+    except Exception as e:
+        errors.append(f"Error during system check: {e}")
+    
+    return errors, warnings
 st.set_page_config(
     page_title="GRIT",
     page_icon="🏈",
@@ -1587,10 +1667,29 @@ with tab_news:
     with news_tabs[2]:
         st.markdown("### 👤 **PLAYER IMPACT INTELLIGENCE**")
         
-        # ORIGINAL player news functionality PRESERVED
-        players_list = [p.strip() for p in players_raw.split(",") if p.strip()]
-        if players_list:
-            try:
+        # ORIGINAL player news functionality PRESERVED WITH VALIDATION
+        try:
+            # FIXED: Safe processing of players_raw
+            if not players_raw or not isinstance(players_raw, str):
+                players_list = ["Mahomes", "Hurts"]  # Safe default
+            else:
+                players_list = [p.strip() for p in players_raw.split(",") if p.strip()]
+            
+            if not players_list:  # Extra safety check
+                players_list = ["Mahomes", "Hurts"]
+            
+            if players_list:
+                # Also need to safely get teams list
+                try:
+                    if not team_codes or not isinstance(team_codes, str):
+                        teams = ["KC", "PHI"]
+                    else:
+                        teams = [t.strip() for t in team_codes.split(",") if t.strip()]
+                    if not teams:
+                        teams = ["KC", "PHI"]
+                except:
+                    teams = ["KC", "PHI"]
+                
                 player_items = safe_cached_player_news(tuple(players_list), teams[0] if teams else "", 3)
                 for item in player_items:
                     with st.expander(f"👤 ({item['player']}) {item['title']}"):
@@ -1604,9 +1703,10 @@ with tab_news:
                             st.warning("🎯 **High Impact:** Red zone efficiency directly affected")
                         else:
                             st.info("📊 **Moderate Impact:** Monitor for lineup changes")
-            except Exception as e:
-                st.error(f"Player intelligence unavailable: {e}")
-        else:
+            else:
+                st.info("💡 Add player names in sidebar to track strategic impact")
+        except Exception as e:
+            st.error(f"Player intelligence error: {str(e)[:100]}...")
             st.info("💡 Add player names in sidebar to track strategic impact")
     
     with news_tabs[3]:
@@ -2007,12 +2107,14 @@ if st.checkbox("🐛 **System Diagnostics**"):
     }
     st.json(debug_info)
 
-# ORIGINAL Platform Information (PRESERVED)
+# ORIGINAL Platform Information (ENHANCED WITH CORRECT BRANDING)
 st.markdown("""
 ---
-**🏈 NFL Strategic Edge Platform v3.0** | Live Data Integration | Belichick-Level Analysis | Professional Coordinator Training
+**🏈 GRIT - NFL Strategic Edge Platform v3.0** | Live Data Integration | Belichick-Level Analysis | Professional Coordinator Training
 
 *"Strategy is not just about winning games, it's about understanding every micro-detail that creates victory. In the NFL, the difference between winning and losing is measured in inches, seconds, and strategic edges."*
 
 **Used by:** NFL Coordinators • Strategic Analysts • Elite Football Minds
+
+**GRIT Philosophy:** Transform raw data into winning strategies through elite-level strategic thinking.
 """)
