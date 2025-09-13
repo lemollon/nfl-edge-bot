@@ -1016,38 +1016,72 @@ tab_coach, tab_game, tab_news, tab_community = st.tabs([
 ])
 
 # =============================================================================
-# COACH MODE - NFL STRATEGIC GURU (ENHANCED BUT PRESERVED)
+# COACH MODE - NFL STRATEGIC GURU (ENHANCED WITH COMPREHENSIVE GUIDANCE)
 # =============================================================================
 with tab_coach:
-    st.markdown("## 🎯 **NFL STRATEGIC GURU**")
-    st.markdown("*Deep strategic analysis that could be used by real NFL coaches*")
+    st.markdown("## 🏈 **COACH MODE - Think Like Belichick**")
+    st.markdown("*Get NFL-level strategic analysis that real coaches could use for game planning*")
     
-    # Quick Strategic Analysis Actions (NEW)
+    # CRITICAL USER GUIDANCE
+    st.info(f"🎯 **Currently analyzing: {selected_team1} vs {selected_team2}** (Change teams in sidebar to analyze different matchups)")
+    
+    # HOW TO USE COACH MODE (PROMINENT GUIDANCE)
+    with st.expander("📋 **HOW TO USE COACH MODE - Read This First!**", expanded=True):
+        st.markdown("""
+        ### 🏈 **Coach Mode gives you 4 ways to get strategic analysis:**
+        
+        **1. ⚡ Edge Detection** - Find specific tactical advantages
+        - Click button → Get instant analysis of exploitable matchups
+        - Example output: "Chiefs allow 5.8 YPC on outside zone left vs 3-4 front"
+        
+        **2. 🎯 Formation Analysis** - Deep dive into personnel packages  
+        - Click button → See exactly which formations work best
+        - Get success rates and tactical recommendations
+        
+        **3. 🌪️ Weather Impact** - How conditions affect strategy
+        - Click button → Get percentage impacts on play calling
+        - See specific adjustments needed for current conditions
+        
+        **4. ⚕️ Injury Exploits** - Turn opponent weaknesses into advantages
+        - Click button → Learn how to exploit specific injuries
+        - Get play calls to attack backup players
+        
+        **5. 💬 Strategic Chat** - Ask specific questions
+        - Type questions like a real coordinator would ask
+        - Get detailed responses with exact percentages and tactics
+        
+        **💡 Pro Tip:** The more specific your question, the better the strategic advice!
+        """)
+    
+    # Quick Strategic Analysis Actions (ENHANCED WITH DETAILED TOOLTIPS)
+    st.markdown("### 🎯 **Instant Strategic Analysis**")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        if st.button("⚡ **Edge Detection**"):
+        if st.button("⚡ **Edge Detection**", help="🔍 Find specific tactical advantages with exact percentages and success rates", use_container_width=True):
             st.session_state.trigger_edge_analysis = True
     
     with col2:
-        if st.button("🎯 **Formation Analysis**"):
+        if st.button("🎯 **Formation Analysis**", help="📐 Deep dive into personnel packages, usage rates, and success percentages", use_container_width=True):
             st.session_state.show_formation_analysis = True
     
     with col3:
-        if st.button("🌪️ **Weather Impact**"):
+        if st.button("🌪️ **Weather Impact**", help="🌡️ See how current conditions affect play calling with specific percentage adjustments", use_container_width=True):
             st.session_state.show_weather_deep_dive = True
     
     with col4:
-        if st.button("⚕️ **Injury Exploits**"):
+        if st.button("⚕️ **Injury Exploits**", help="🏥 Learn how to exploit opponent injuries with specific play calls and personnel mismatches", use_container_width=True):
             st.session_state.show_injury_exploits = True
     
-    # Edge Detection Analysis (NEW)
+    # Edge Detection Analysis (ENHANCED WITH EXPLANATION)
     if st.session_state.get('trigger_edge_analysis', False):
-        with st.spinner("🔍 Detecting strategic edges..."):
-            question = f"Find the specific tactical edges for {selected_team1} vs {selected_team2}"
+        st.markdown("### 🔍 **STRATEGIC EDGE DETECTION**")
+        st.info("🎯 **What this shows:** Specific tactical advantages you can exploit with exact success rates")
+        
+        with st.spinner("🔍 Detecting strategic edges like Belichick would..."):
+            question = f"Find the specific tactical edges for {selected_team1} vs {selected_team2} with exact percentages and success rates"
             analysis = generate_strategic_analysis(selected_team1, selected_team2, question, strategic_data, weather_data, injury_data)
             
-            st.markdown("### 🔍 **STRATEGIC EDGE DETECTION**")
             st.markdown(analysis)
             
             col1, col2 = st.columns(2)
@@ -1055,15 +1089,16 @@ with tab_coach:
                 st.download_button("📄 Export Edge Analysis", analysis, 
                                  file_name=f"edge_analysis_{selected_team1}_vs_{selected_team2}.txt")
             with col2:
-                if st.button("🔄 Regenerate Edge Analysis"):
+                if st.button("🔄 Get New Edge Analysis"):
                     st.session_state.trigger_edge_analysis = True
                     st.rerun()
         
         st.session_state.trigger_edge_analysis = False
     
-    # Formation Analysis (NEW)
+    # Formation Analysis (ENHANCED WITH CLEAR EXPLANATION)
     if st.session_state.get('show_formation_analysis', False):
         st.markdown("### 📐 **FORMATION TENDENCY ANALYSIS**")
+        st.info("📊 **What this shows:** Which personnel packages work best and why, with exact usage rates")
         
         col1, col2 = st.columns(2)
         
@@ -1072,20 +1107,37 @@ with tab_coach:
             team1_formations = strategic_data['team1_data']['formation_data']
             
             for formation, data in team1_formations.items():
-                st.metric(f"{formation.replace('_', ' ').title()}", 
-                         f"{data['usage']*100:.1f}% • {data['ypp']} YPP • {data['success_rate']*100:.1f}% success")
+                with st.container():
+                    st.metric(
+                        f"{formation.replace('_', ' ').title()}", 
+                        f"{data['usage']*100:.1f}% usage",
+                        f"{data['ypp']} YPP • {data['success_rate']*100:.1f}% success",
+                        help=f"This formation is used {data['usage']*100:.1f}% of the time with {data['success_rate']*100:.1f}% success rate"
+                    )
         
         with col2:
             st.markdown(f"**{selected_team2} Defensive Tendencies:**")
             team2_situational = strategic_data['team2_data']['situational_tendencies']
             
-            st.metric("3rd Down Stops", f"{(1-team2_situational['third_down_conversion'])*100:.1f}%")
-            st.metric("Red Zone Defense", f"{(1-team2_situational['red_zone_efficiency'])*100:.1f}%")
-            st.metric("vs Play Action", f"{(1-team2_situational['play_action_success'])*100:.1f}%")
+            st.metric(
+                "3rd Down Stops", 
+                f"{(1-team2_situational['third_down_conversion'])*100:.1f}%",
+                help="Percentage of 3rd downs the opponent stops - lower is better for you"
+            )
+            st.metric(
+                "Red Zone Defense", 
+                f"{(1-team2_situational['red_zone_efficiency'])*100:.1f}%",
+                help="How often they stop red zone scoring attempts - key for goal line strategy"
+            )
+            st.metric(
+                "vs Play Action", 
+                f"{(1-team2_situational.get('play_action_success', 0.7))*100:.1f}% stops",
+                help="Their success rate stopping play action - lower means more opportunity"
+            )
         
         # Formation recommendation
         best_formation = max(team1_formations.items(), key=lambda x: x[1]['success_rate'])
-        st.success(f"🎯 **Recommended Focus:** {best_formation[0].replace('_', ' ').title()} - {best_formation[1]['success_rate']*100:.1f}% success rate")
+        st.success(f"🎯 **Strategic Recommendation:** Focus on {best_formation[0].replace('_', ' ').title()} - {best_formation[1]['success_rate']*100:.1f}% success rate")
         
         st.session_state.show_formation_analysis = False
     
