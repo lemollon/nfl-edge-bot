@@ -112,54 +112,128 @@ st.set_page_config(
 )
 
 # =============================================================================
-# COMPREHENSIVE CSS FOR CHROME COMPATIBILITY
+# COMPREHENSIVE CSS FOR CHROME SIDEBAR FIX
 # =============================================================================
 st.markdown("""
 <style>
-    /* Global dark theme enforcement */
+    /* GLOBAL DARK THEME ENFORCEMENT */
     .stApp {
         background-color: #0a0a0a !important;
-    }
-    
-    /* Force all text to be white */
-    * {
         color: #ffffff !important;
     }
     
-    /* Sidebar specific styling - Chrome compatibility */
-    .css-1d391kg {
+    /* SIDEBAR - CHROME SPECIFIC FIXES */
+    section[data-testid="stSidebar"] {
         background-color: #1a1a1a !important;
     }
     
-    .stSidebar {
+    section[data-testid="stSidebar"] > div {
         background-color: #1a1a1a !important;
     }
     
-    .stSidebar * {
+    section[data-testid="stSidebar"] * {
+        color: #ffffff !important;
         background-color: transparent !important;
+    }
+    
+    /* SIDEBAR TEXT ELEMENTS */
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] .stMarkdown p,
+    section[data-testid="stSidebar"] .stMarkdown h1,
+    section[data-testid="stSidebar"] .stMarkdown h2,
+    section[data-testid="stSidebar"] .stMarkdown h3,
+    section[data-testid="stSidebar"] .stMarkdown h4,
+    section[data-testid="stSidebar"] .stMarkdown span,
+    section[data-testid="stSidebar"] .stMarkdown div {
         color: #ffffff !important;
     }
     
-    .stSidebar .stMarkdown {
+    /* SIDEBAR FORM ELEMENTS */
+    section[data-testid="stSidebar"] .stSelectbox label,
+    section[data-testid="stSidebar"] .stTextInput label,
+    section[data-testid="stSidebar"] .stSlider label,
+    section[data-testid="stSidebar"] .stCheckbox label {
         color: #ffffff !important;
     }
     
-    .stSidebar h1, .stSidebar h2, .stSidebar h3 {
+    /* SIDEBAR INPUT FIELDS */
+    section[data-testid="stSidebar"] .stSelectbox > div > div,
+    section[data-testid="stSidebar"] .stTextInput > div > div > input,
+    section[data-testid="stSidebar"] .stTextArea > div > div > textarea {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
+    }
+    
+    /* SIDEBAR METRIC CONTAINERS */
+    section[data-testid="stSidebar"] div[data-testid="metric-container"] {
+        background-color: #262626 !important;
+        border: 1px solid #444 !important;
         color: #ffffff !important;
     }
     
-    /* Main content area */
-    .main .block-container {
+    section[data-testid="stSidebar"] div[data-testid="metric-container"] * {
+        color: #ffffff !important;
+    }
+    
+    /* SIDEBAR EXPANDERS */
+    section[data-testid="stSidebar"] .streamlit-expanderHeader {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
+    }
+    
+    section[data-testid="stSidebar"] .streamlit-expanderContent {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+    
+    /* HEADER BAR - TOP NAVIGATION */
+    header[data-testid="stHeader"] {
+        background-color: #1a1a1a !important;
+    }
+    
+    /* MAIN HEADER SECTION */
+    .main-header {
+        background: linear-gradient(90deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+        color: #ffffff !important;
+        padding: 2rem !important;
+        border-radius: 10px !important;
+        border: 2px solid #00ff41 !important;
+        margin-bottom: 2rem !important;
+    }
+    
+    .main-header h1, .main-header h3, .main-header p {
+        color: #ffffff !important;
+    }
+    
+    /* TAB STYLING */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px !important;
         background-color: #0a0a0a !important;
     }
     
-    /* Button styling */
+    .stTabs [data-baseweb="tab"] {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        border: 1px solid #333 !important;
+        border-radius: 8px !important;
+        font-weight: bold !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
+        color: #000000 !important;
+    }
+    
+    /* BUTTON STYLING */
     .stButton > button {
         background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
         color: #000000 !important;
         border: none !important;
         border-radius: 8px !important;
         font-weight: bold !important;
+        transition: all 0.3s ease !important;
     }
     
     .stButton > button:hover {
@@ -167,7 +241,7 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(0, 255, 65, 0.3) !important;
     }
     
-    /* Input fields */
+    /* MAIN CONTENT INPUT FIELDS */
     .stTextInput > div > div > input {
         background-color: #262626 !important;
         color: #ffffff !important;
@@ -186,61 +260,100 @@ st.markdown("""
         border: 1px solid #444 !important;
     }
     
-    /* Tabs styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background-color: #1a1a1a !important;
-        color: #ffffff !important;
-        border: 1px solid #333 !important;
-        border-radius: 8px !important;
-        font-weight: bold !important;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
-        color: #000000 !important;
-    }
-    
-    /* Metric containers */
+    /* METRIC CONTAINERS */
     div[data-testid="metric-container"] {
         background-color: #262626 !important;
         border: 1px solid #444 !important;
+        color: #ffffff !important;
         padding: 1rem !important;
         border-radius: 8px !important;
     }
     
-    /* Alert messages */
+    div[data-testid="metric-container"] * {
+        color: #ffffff !important;
+    }
+    
+    /* ALERT MESSAGES */
     .stAlert {
         color: #ffffff !important;
     }
     
-    /* Expanders */
+    div[data-testid="stNotificationContentError"] {
+        background-color: #2d1a1a !important;
+        color: #ffffff !important;
+        border: 1px solid #ff4444 !important;
+    }
+    
+    div[data-testid="stNotificationContentSuccess"] {
+        background-color: #1a2d1a !important;
+        color: #ffffff !important;
+        border: 1px solid #00ff41 !important;
+    }
+    
+    div[data-testid="stNotificationContentWarning"] {
+        background-color: #2d2d1a !important;
+        color: #ffffff !important;
+        border: 1px solid #ffaa00 !important;
+    }
+    
+    div[data-testid="stNotificationContentInfo"] {
+        background-color: #1a1a2d !important;
+        color: #ffffff !important;
+        border: 1px solid #0066cc !important;
+    }
+    
+    /* EXPANDERS */
     .streamlit-expanderHeader {
         background-color: #1a1a1a !important;
         color: #ffffff !important;
         border: 1px solid #333 !important;
     }
     
-    /* Chat messages */
+    .streamlit-expanderContent {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+    
+    /* CHAT MESSAGES */
     .stChatMessage {
         background-color: #262626 !important;
         border: 1px solid #444 !important;
+        color: #ffffff !important;
     }
     
-    /* Sliders */
+    .stChatMessage * {
+        color: #ffffff !important;
+    }
+    
+    /* SLIDER STYLING */
     .stSlider {
         color: #ffffff !important;
     }
     
-    /* Checkbox labels */
+    /* CHECKBOX STYLING */
     .stCheckbox > label {
         color: #ffffff !important;
     }
     
-    /* Voice indicator */
+    /* DATAFRAME STYLING */
+    .stDataFrame {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    /* FORCE ALL TEXT TO WHITE */
+    * {
+        color: #ffffff !important;
+    }
+    
+    /* EXCEPTIONS - KEEP THESE DARK */
+    .stButton > button,
+    .stTabs [aria-selected="true"],
+    .stDownloadButton > button {
+        color: #000000 !important;
+    }
+    
+    /* VOICE INDICATOR */
     .voice-active {
         animation: pulse 2s infinite;
         background: #00ff41 !important;
@@ -257,13 +370,17 @@ st.markdown("""
         100% { opacity: 1; }
     }
     
-    /* Exception: Keep button text dark */
-    .stButton > button {
-        color: #000000 !important;
+    /* ADDITIONAL CHROME FIXES */
+    .css-1d391kg, .css-1y4p8pa, .css-17eq0hr, .css-k1vhr4 {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
     }
     
-    .stTabs [aria-selected="true"] {
-        color: #000000 !important;
+    /* ENSURE SIDEBAR VISIBILITY */
+    .stSidebar .element-container,
+    .stSidebar .stVerticalBlock,
+    .stSidebar .stHorizontalBlock {
+        color: #ffffff !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -475,26 +592,37 @@ def mock_ladder():
 # =============================================================================
 
 def init_rag():
-    """Initialize RAG system with proper error handling"""
+    """Initialize RAG system with comprehensive error handling"""
     if RAG_AVAILABLE:
         try:
-            # Try to initialize with default parameters
+            # Try multiple initialization approaches
             return SimpleRAG()
-        except TypeError:
-            # If it needs data_dir parameter
+        except TypeError as e:
             try:
+                # If it needs data_dir parameter
                 return SimpleRAG(data_dir="./data")
             except:
-                st.warning("RAG system needs configuration - using mock system")
-                return MockRAG()
+                try:
+                    # Try with build() call if needed
+                    rag_instance = SimpleRAG()
+                    if hasattr(rag_instance, 'build'):
+                        rag_instance.build()
+                    return rag_instance
+                except:
+                    st.warning("RAG system needs data - using mock system")
+                    return MockRAG()
         except Exception as e:
-            st.warning(f"RAG initialization failed: {e} - using mock system")
+            st.warning(f"RAG unavailable: {str(e)[:50]}... - using mock system")
             return MockRAG()
     else:
         return MockRAG()
 
 # Initialize RAG without caching to avoid tokenize errors
-rag = init_rag()
+try:
+    rag = init_rag()
+except Exception as e:
+    st.warning(f"RAG initialization failed: {e}")
+    rag = MockRAG()
 
 def safe_cached_news(limit: int, teams: tuple) -> list:
     """Safely get news with fallback"""
