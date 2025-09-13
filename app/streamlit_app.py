@@ -797,39 +797,81 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* SELECTBOX WITH GRADIENT ACCENTS */
+    /* CRITICAL FIX - SELECTBOX TEXT VISIBILITY */
     .stSelectbox > div > div,
     div[data-baseweb="select"] > div,
-    div[data-baseweb="select"],
-    .stSelectbox * {
+    div[data-baseweb="select"] {
         background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
         color: #ffffff !important;
         border: 1px solid #444 !important;
     }
     
+    /* FORCE WHITE TEXT IN SELECTBOX INPUT */
+    .stSelectbox > div > div > div,
+    .stSelectbox > div > div > div > div,
+    .stSelectbox > div > div > div span,
+    .stSelectbox input,
+    .stSelectbox div[data-baseweb="select"] > div,
+    .stSelectbox div[data-baseweb="select"] span {
+        color: #ffffff !important;
+        background-color: transparent !important;
+    }
+    
+    /* DROPDOWN OPTIONS WITH MAXIMUM VISIBILITY */
     div[role="listbox"],
     ul[role="listbox"] {
-        background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
+        background-color: #262626 !important;
         border: 1px solid #00ff41 !important;
         box-shadow: 0 4px 8px rgba(0,255,65,0.2) !important;
         z-index: 9999 !important;
     }
     
+    /* FORCE WHITE TEXT IN ALL DROPDOWN OPTIONS */
     div[role="listbox"] li,
     ul[role="listbox"] li,
     div[role="option"],
-    li[role="option"] {
-        background-color: transparent !important;
+    li[role="option"],
+    div[role="listbox"] li span,
+    ul[role="listbox"] li span,
+    div[role="option"] span,
+    li[role="option"] span,
+    div[role="listbox"] li div,
+    ul[role="listbox"] li div,
+    div[role="option"] div,
+    li[role="option"] div {
+        background-color: #262626 !important;
         color: #ffffff !important;
         padding: 12px !important;
     }
     
+    /* HOVER EFFECTS WITH MAINTAINED TEXT VISIBILITY */
     div[role="listbox"] li:hover,
     ul[role="listbox"] li:hover,
     div[role="option"]:hover,
-    li[role="option"]:hover {
+    li[role="option"]:hover,
+    div[role="listbox"] li:hover span,
+    ul[role="listbox"] li:hover span,
+    div[role="option"]:hover span,
+    li[role="option"]:hover span,
+    div[role="listbox"] li:hover div,
+    ul[role="listbox"] li:hover div,
+    div[role="option"]:hover div,
+    li[role="option"]:hover div {
         background: linear-gradient(90deg, #1a2e1a 0%, #2a4a2a 100%) !important;
         color: #ffffff !important;
+    }
+    
+    /* NUCLEAR OPTION - FORCE DROPDOWN TEXT VISIBILITY */
+    [data-baseweb="popover"] *,
+    [data-baseweb="popover"] li,
+    [data-baseweb="popover"] span,
+    [data-baseweb="popover"] div {
+        color: #ffffff !important;
+        background-color: transparent !important;
+    }
+    
+    [data-baseweb="popover"] {
+        background-color: #262626 !important;
     }
     
     /* ENHANCED GRADIENT TABS */
