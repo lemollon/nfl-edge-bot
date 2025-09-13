@@ -544,23 +544,38 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enhanced CSS for Professional Appearance and Readability
+# Enhanced CSS for Professional Appearance and Chrome Compatibility
 st.markdown("""
 <style>
-    /* Force dark theme for all elements */
-    .stApp, .main, .block-container, .css-1d391kg {
+    /* Force dark theme for all elements - Chrome specific fixes */
+    .stApp, .main, .block-container, .css-1d391kg, .css-1y4p8pa {
         background-color: #0a0a0a !important;
         color: #ffffff !important;
     }
     
-    /* Override any light theme elements */
-    .stMarkdown, .stText, p, span, div, h1, h2, h3, h4, h5, h6 {
+    /* Sidebar specific fixes for Chrome */
+    .css-1d391kg, .css-1y4p8pa, .css-17eq0hr, .css-k1vhr4, .stSidebar {
+        background-color: #1a1a1a !important;
         color: #ffffff !important;
     }
     
-    /* Sidebar styling */
-    .css-1d391kg, .css-1y4p8pa, .css-17eq0hr {
-        background-color: #1a1a1a !important;
+    /* Force white text on all sidebar elements */
+    .stSidebar * {
+        color: #ffffff !important;
+    }
+    
+    .stSidebar .stMarkdown, .stSidebar .stText, .stSidebar p, .stSidebar span, .stSidebar div, .stSidebar label {
+        color: #ffffff !important;
+    }
+    
+    /* Sidebar headers and titles */
+    .stSidebar h1, .stSidebar h2, .stSidebar h3, .stSidebar h4, .stSidebar h5, .stSidebar h6 {
+        color: #ffffff !important;
+    }
+    
+    /* Override any light theme elements */
+    .stMarkdown, .stText, p, span, div, h1, h2, h3, h4, h5, h6, label {
+        color: #ffffff !important;
     }
     
     /* Header styling */
@@ -589,16 +604,28 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(0, 255, 65, 0.3) !important;
     }
     
-    /* Input styling */
+    /* Input styling - Chrome specific */
     .stSelectbox > div > div, .stTextInput > div > div, .stTextArea > div > div {
         background-color: #262626 !important;
         color: #ffffff !important;
         border: 1px solid #444 !important;
     }
     
+    .stSelectbox > div > div > div {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Dropdown options */
+    .stSelectbox option {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
     /* Tab styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
+        background-color: #0a0a0a !important;
     }
     
     .stTabs [data-baseweb="tab"] {
@@ -615,11 +642,12 @@ st.markdown("""
     }
     
     /* Metrics styling */
-    .css-1xarl3l, .css-1wivap2 {
+    .css-1xarl3l, .css-1wivap2, .metric-container {
         background-color: #262626 !important;
         border: 1px solid #444 !important;
         padding: 1rem !important;
         border-radius: 8px;
+        color: #ffffff !important;
     }
     
     /* Expander styling */
@@ -629,35 +657,80 @@ st.markdown("""
         border: 1px solid #333 !important;
     }
     
+    .streamlit-expanderContent {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+    
     /* Chat message styling */
     .stChatMessage {
         background-color: #262626 !important;
         border: 1px solid #444 !important;
+        color: #ffffff !important;
+    }
+    
+    .stChatMessage * {
+        color: #ffffff !important;
     }
     
     /* Alert styling */
     .stAlert > div {
+        color: #ffffff !important;
+    }
+    
+    .stAlert[data-baseweb="notification"] [data-testid="stNotificationContentError"] {
         background-color: #2d1a1a !important;
         color: #ffffff !important;
         border: 1px solid #ff4444 !important;
     }
     
-    .stSuccess > div {
+    .stAlert[data-baseweb="notification"] [data-testid="stNotificationContentSuccess"] {
         background-color: #1a2d1a !important;
         color: #ffffff !important;
         border: 1px solid #00ff41 !important;
     }
     
-    .stWarning > div {
+    .stAlert[data-baseweb="notification"] [data-testid="stNotificationContentWarning"] {
         background-color: #2d2d1a !important;
         color: #ffffff !important;
         border: 1px solid #ffaa00 !important;
     }
     
-    .stInfo > div {
+    .stAlert[data-baseweb="notification"] [data-testid="stNotificationContentInfo"] {
         background-color: #1a1a2d !important;
         color: #ffffff !important;
         border: 1px solid #0066cc !important;
+    }
+    
+    /* Slider styling */
+    .stSlider > div > div > div {
+        background-color: #262626 !important;
+    }
+    
+    .stSlider [role="slider"] {
+        background-color: #00ff41 !important;
+    }
+    
+    /* Checkbox and radio styling */
+    .stCheckbox > label, .stRadio > label {
+        color: #ffffff !important;
+    }
+    
+    /* Dataframe styling */
+    .stDataFrame {
+        background-color: #262626 !important;
+    }
+    
+    .stDataFrame table {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Chrome specific fixes */
+    input, select, textarea {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
     }
     
     /* Voice indicator */
@@ -677,14 +750,21 @@ st.markdown("""
         100% { opacity: 1; }
     }
     
-    /* Dataframe styling */
-    .stDataFrame {
-        background-color: #262626 !important;
+    /* Container background fix */
+    .stContainer, .element-container {
+        background-color: transparent !important;
     }
     
-    /* Slider styling */
-    .stSlider > div > div > div {
+    /* Code block styling */
+    .stCodeBlock {
         background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    /* JSON display styling */
+    .stJson {
+        background-color: #262626 !important;
+        color: #ffffff !important;
     }
 </style>
 """, unsafe_allow_html=True)
