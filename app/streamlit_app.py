@@ -724,7 +724,7 @@ st.set_page_config(
 # =============================================================================
 st.markdown("""
 <style>
-    /* GLOBAL DARK THEME - ENHANCED TEXT VISIBILITY */
+    /* GLOBAL DARK THEME - GREEN DESIGN WITH ENHANCED GRADIENTS */
     .stApp {
         background-color: #0a0a0a !important;
         color: #ffffff !important;
@@ -735,9 +735,9 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* SIDEBAR */
+    /* SIDEBAR WITH GRADIENT */
     section[data-testid="stSidebar"] {
-        background-color: #1a1a1a !important;
+        background: linear-gradient(180deg, #1a1a1a 0%, #0f1f0f 100%) !important;
         color: #ffffff !important;
     }
     
@@ -745,7 +745,7 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* ENHANCED BUTTONS WITH MAXIMUM VISIBILITY */
+    /* ENHANCED GRADIENT BUTTONS */
     .stButton > button {
         background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
         color: #000000 !important;
@@ -757,6 +757,7 @@ st.markdown("""
     }
     
     .stButton > button:hover {
+        background: linear-gradient(90deg, #00ff41 0%, #0080ff 100%) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 12px rgba(0,255,65,0.4) !important;
     }
@@ -768,38 +769,41 @@ st.markdown("""
     .stButton > button * {
         color: #000000 !important;
         font-weight: bold !important;
-        text-shadow: none !important;
     }
     
-    /* CRITICAL - SECONDARY BUTTONS WITH DARK BACKGROUND */
+    /* SECONDARY BUTTONS WITH GRADIENT */
     .stButton button[kind="secondary"],
     .stButton button:not([kind="primary"]) {
-        background: #262626 !important;
+        background: linear-gradient(135deg, #262626 0%, #1a2e1a 100%) !important;
         color: #ffffff !important;
         border: 2px solid #00ff41 !important;
+    }
+    
+    .stButton button[kind="secondary"]:hover,
+    .stButton button:not([kind="primary"]):hover {
+        background: linear-gradient(135deg, #1a2e1a 0%, #2a4a2a 100%) !important;
     }
     
     .stButton button[kind="secondary"] *,
     .stButton button:not([kind="primary"]) * {
         color: #ffffff !important;
-        background: transparent !important;
     }
     
-    /* COMPREHENSIVE SELECTBOX DROPDOWN FIX */
+    /* SELECTBOX WITH GRADIENT ACCENTS */
     .stSelectbox > div > div,
     div[data-baseweb="select"] > div,
     div[data-baseweb="select"],
     .stSelectbox * {
-        background-color: #262626 !important;
+        background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
         color: #ffffff !important;
         border: 1px solid #444 !important;
     }
     
     div[role="listbox"],
     ul[role="listbox"] {
-        background-color: #262626 !important;
-        border: 1px solid #444 !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.8) !important;
+        background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
+        border: 1px solid #00ff41 !important;
+        box-shadow: 0 4px 8px rgba(0,255,65,0.2) !important;
         z-index: 9999 !important;
     }
     
@@ -807,7 +811,7 @@ st.markdown("""
     ul[role="listbox"] li,
     div[role="option"],
     li[role="option"] {
-        background-color: #262626 !important;
+        background-color: transparent !important;
         color: #ffffff !important;
         padding: 12px !important;
     }
@@ -816,19 +820,199 @@ st.markdown("""
     ul[role="listbox"] li:hover,
     div[role="option"]:hover,
     li[role="option"]:hover {
-        background-color: #333333 !important;
+        background: linear-gradient(90deg, #1a2e1a 0%, #2a4a2a 100%) !important;
         color: #ffffff !important;
     }
     
-    /* TABS WITH ENHANCED VISIBILITY */
+    /* ENHANCED GRADIENT TABS */
     .stTabs [data-baseweb="tab-list"] {
-        background-color: #0a0a0a !important;
+        background: linear-gradient(90deg, #0a0a0a 0%, #0f1f0f 100%) !important;
     }
     
     .stTabs [data-baseweb="tab"] {
-        background-color: #1a1a1a !important;
+        background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%) !important;
         color: #ffffff !important;
         border: 1px solid #333 !important;
+        border-radius: 8px 8px 0 0 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
+        color: #000000 !important;
+        box-shadow: 0 0 20px rgba(0,255,65,0.5) !important;
+        font-weight: bold !important;
+    }
+    
+    /* GRADIENT METRICS */
+    div[data-testid="metric-container"] {
+        background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
+        border: 1px solid #444 !important;
+        color: #ffffff !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+        transition: transform 0.2s ease !important;
+    }
+    
+    div[data-testid="metric-container"]:hover {
+        background: linear-gradient(135deg, #1a2e1a 0%, #262626 100%) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 16px rgba(0,255,65,0.2) !important;
+    }
+    
+    div[data-testid="metric-container"] * {
+        color: #ffffff !important;
+    }
+    
+    /* GRADIENT CHAT INTERFACE */
+    .stChatInput, .stChatInput input, .stChatMessage {
+        background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
+        border-radius: 10px !important;
+    }
+    
+    .stChatMessage * {
+        color: #ffffff !important;
+        background-color: transparent !important;
+    }
+    
+    /* GRADIENT EXPANDERS */
+    .streamlit-expanderHeader {
+        background: linear-gradient(90deg, #1a1a1a 0%, #1a2e1a 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid #333 !important;
+        border-radius: 8px !important;
+    }
+    
+    .streamlit-expanderContent {
+        background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid #333 !important;
+        border-radius: 8px !important;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        background: linear-gradient(90deg, #1a2e1a 0%, #2a4a2a 100%) !important;
+        border-color: #00ff41 !important;
+        box-shadow: 0 0 10px rgba(0,255,65,0.3) !important;
+    }
+    
+    .streamlit-expanderHeader *,
+    .streamlit-expanderContent * {
+        color: #ffffff !important;
+    }
+    
+    /* GRADIENT FORM ELEMENTS */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {
+        background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
+        border-radius: 8px !important;
+    }
+    
+    .stTextInput label,
+    .stTextArea label,
+    .stSlider label,
+    .stCheckbox > label {
+        color: #ffffff !important;
+    }
+    
+    /* ENHANCED GRADIENT PROGRESS BARS */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
+    }
+    
+    /* GREEN-THEMED GRADIENT ALERT MESSAGES */
+    .stAlert {
+        border-radius: 10px !important;
+    }
+    
+    .stSuccess {
+        background: linear-gradient(135deg, #1a2e1a 0%, #0f1f0f 100%) !important;
+        color: #ffffff !important;
+        border-left: 4px solid #00ff41 !important;
+    }
+    
+    .stError {
+        background: linear-gradient(135deg, #1a2e1a 0%, #2e1a1a 100%) !important;
+        color: #ffffff !important;
+        border-left: 4px solid #00ff41 !important;
+    }
+    
+    .stWarning {
+        background: linear-gradient(135deg, #1a2e1a 0%, #2e2e1a 100%) !important;
+        color: #ffffff !important;
+        border-left: 4px solid #00ff41 !important;
+    }
+    
+    .stInfo {
+        background: linear-gradient(135deg, #1a2e1a 0%, #1a1a2e 100%) !important;
+        color: #ffffff !important;
+        border-left: 4px solid #00ff41 !important;
+    }
+    
+    /* GRADIENT DATAFRAMES */
+    .stDataFrame table {
+        background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%) !important;
+        color: #ffffff !important;
+    }
+    
+    .stDataFrame th {
+        background: linear-gradient(90deg, #1a2e1a 0%, #2a4a2a 100%) !important;
+        color: #ffffff !important;
+    }
+    
+    .stDataFrame td {
+        background-color: transparent !important;
+        color: #ffffff !important;
+    }
+    
+    /* MARKDOWN CONTENT */
+    .stMarkdown,
+    .stMarkdown * {
+        color: #ffffff !important;
+    }
+    
+    /* GRADIENT ERROR MESSAGES */
+    .element-container div[role="alert"] {
+        background: linear-gradient(135deg, #1a2e1a 0%, #2e1a1a 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid #00ff41 !important;
+    }
+    
+    /* HIDE STREAMLIT BRANDING */
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+    
+    /* CUSTOM GRADIENT ANIMATIONS */
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 5px rgba(0,255,65,0.3); }
+        50% { box-shadow: 0 0 20px rgba(0,255,65,0.6); }
+        100% { box-shadow: 0 0 5px rgba(0,255,65,0.3); }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 2s infinite !important;
+    }
+    
+    /* FORCE ALL TEXT WHITE EXCEPT BUTTONS */
+    body, div, span, p, h1, h2, h3, h4, h5, h6, li, td, th, 
+    .stMarkdown, .stText, .stCaption, .stCode {
+        color: #ffffff !important;
+    }
+    
+    /* KEEP BUTTON TEXT DARK ON BRIGHT BACKGROUNDS */
+    .stTabs [aria-selected="true"],
+    .stTabs [aria-selected="true"] *,
+    .stButton > button,
+    .stButton > button * {
+        color: #000000 !important;
+    }
+</style>
+""", unsafe_allow_html=True) 1px solid #333 !important;
         border-radius: 8px 8px 0 0 !important;
         transition: all 0.3s ease !important;
     }
