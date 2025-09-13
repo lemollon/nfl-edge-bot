@@ -612,6 +612,33 @@ st.markdown("""
         color: #ffffff !important;
     }
     
+    /* BRUTE FORCE DROPDOWN FIX - Target any remaining white elements */
+    .stSelectbox *, 
+    [data-baseweb="select"] *,
+    [data-baseweb="popover"] *,
+    [role="listbox"] *,
+    [role="option"] * {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Override Streamlit's default white backgrounds */
+    .stSelectbox *[style],
+    [data-baseweb="select"] *[style],
+    [data-baseweb="popover"] *[style] {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Force all dropdown related elements to dark theme */
+    div:has(> [data-baseweb="select"]),
+    div:has(> .stSelectbox),
+    div:has(> [role="listbox"]),
+    div:has(> [role="option"]) {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+    }
+    
     /* Force override any remaining white elements */
     * {
         scrollbar-color: #444 #262626;
