@@ -149,216 +149,112 @@ except Exception as e:
 # =============================================================================
 @st.cache_data(ttl=1800)
 def get_nfl_strategic_data(team1, team2):
-    """Get comprehensive strategic data for NFL matchup analysis"""
+    """Get comprehensive strategic data with flexible scraping support"""
     
-    # Advanced team statistics with formation-specific data
-    team_strategic_data = {
-        'Kansas City Chiefs': {
+    try:
+        # This is where you would integrate real scraping
+        # For now, using enhanced mock data with flexible structure
+        raw_team_data = scrape_team_data_flexible(team1, team2)
+        
+        # Normalize whatever data we get into standard format
+        team1_normalized = normalize_team_data(raw_team_data.get('team1', {}), team1)
+        team2_normalized = normalize_team_data(raw_team_data.get('team2', {}), team2)
+        
+        return {
+            'team1_data': team1_normalized,
+            'team2_data': team2_normalized
+        }
+        
+    except Exception as e:
+        # Fallback with default strategic data
+        return {
+            'team1_data': normalize_team_data({}, team1),
+            'team2_data': normalize_team_data({}, team2)
+        }
+
+def scrape_team_data_flexible(team1, team2):
+    """Flexible scraping function that adapts to any data source format"""
+    
+    # This function would contain your actual scraping logic
+    # It can handle ESPN, NFL.com, Pro Football Reference, etc.
+    # Returns data in whatever format it finds, normalization happens elsewhere
+    
+    # Mock implementation - replace with real scraping
+    mock_data = {
+        'team1': {
             'formation_data': {
-                '11_personnel': {'usage': 0.68, 'ypp': 6.4, 'success_rate': 0.72},
-                '12_personnel': {'usage': 0.22, 'ypp': 5.1, 'success_rate': 0.65},
-                '21_personnel': {'usage': 0.10, 'ypp': 4.8, 'success_rate': 0.78}
+                '11_personnel': {'usage': 0.68, 'ypp': 6.2, 'success_rate': 0.72} if team1 == 'Kansas City Chiefs' else {'usage': 0.65, 'ypp': 5.8}
             },
             'situational_tendencies': {
-                'third_down_conversion': 0.423,
-                'red_zone_efficiency': 0.678,
-                'first_down_run_pct': 0.45,
-                'play_action_success': 0.745,
-                'screen_success_rate': 0.68
-            },
-            'personnel_advantages': {
-                'te_vs_lb_mismatch': 0.82,  # Success rate when TE matched vs LB
-                'slot_vs_safety': 0.67,
-                'outside_zone_left': 5.8,  # YPC
-                'outside_zone_right': 4.2
-            },
-            'weather_adjustments': {
-                'wind_15plus': {'pass_completion': -0.18, 'deep_ball': -0.31},
-                'cold_weather': {'fumble_rate': 0.15, 'kicking_accuracy': -0.08},
-                'rain': {'run_efficiency': 0.12, 'pass_efficiency': -0.22}
+                'third_down_conversion': 0.423 if team1 == 'Kansas City Chiefs' else 0.40,
+                'red_zone_efficiency': 0.678 if team1 == 'Kansas City Chiefs' else 0.60
             }
         },
-        'Philadelphia Eagles': {
+        'team2': {
             'formation_data': {
-                '11_personnel': {'usage': 0.71, 'ypp': 5.9, 'success_rate': 0.68},
-                '12_personnel': {'usage': 0.19, 'ypp': 6.2, 'success_rate': 0.74},
-                '21_personnel': {'usage': 0.10, 'ypp': 5.1, 'success_rate': 0.71}
+                '11_personnel': {'usage': 0.71, 'ypp': 5.9} if team2 == 'Philadelphia Eagles' else {'usage': 0.60}
             },
             'situational_tendencies': {
-                'third_down_conversion': 0.387,
-                'red_zone_efficiency': 0.589,
-                'first_down_run_pct': 0.52,
-                'play_action_success': 0.692,
-                'screen_success_rate': 0.61
-            },
-            'personnel_advantages': {
-                'te_vs_lb_mismatch': 0.74,
-                'slot_vs_safety': 0.71,
-                'outside_zone_left': 4.9,
-                'outside_zone_right': 5.4
-            },
-            'weather_adjustments': {
-                'wind_15plus': {'pass_completion': -0.15, 'deep_ball': -0.28},
-                'cold_weather': {'fumble_rate': 0.12, 'kicking_accuracy': -0.06},
-                'rain': {'run_efficiency': 0.08, 'pass_efficiency': -0.19}
-            }
-        },
-        'Buffalo Bills': {
-            'formation_data': {
-                '11_personnel': {'usage': 0.74, 'ypp': 6.1, 'success_rate': 0.71},
-                '12_personnel': {'usage': 0.18, 'ypp': 5.8, 'success_rate': 0.69},
-                '21_personnel': {'usage': 0.08, 'ypp': 5.2, 'success_rate': 0.75}
-            },
-            'situational_tendencies': {
-                'third_down_conversion': 0.441,
-                'red_zone_efficiency': 0.632,
-                'first_down_run_pct': 0.41,
-                'play_action_success': 0.758,
-                'screen_success_rate': 0.72
-            },
-            'personnel_advantages': {
-                'te_vs_lb_mismatch': 0.79,
-                'slot_vs_safety': 0.73,
-                'outside_zone_left': 5.2,
-                'outside_zone_right': 4.8
-            },
-            'weather_adjustments': {
-                'wind_15plus': {'pass_completion': -0.12, 'deep_ball': -0.25},
-                'cold_weather': {'fumble_rate': 0.08, 'kicking_accuracy': -0.04},
-                'rain': {'run_efficiency': 0.15, 'pass_efficiency': -0.16}
+                'third_down_conversion': 0.387 if team2 == 'Philadelphia Eagles' else 0.38
             }
         }
     }
     
-    return {
-        'team1_data': team_strategic_data.get(team1, team_strategic_data['Kansas City Chiefs']),
-        'team2_data': team_strategic_data.get(team2, team_strategic_data['Philadelphia Eagles'])
-    }
+    return mock_data
 
 @st.cache_data(ttl=3600)
 def get_weather_strategic_impact(team_name):
-    """Get detailed weather data with strategic implications"""
+    """Get weather data with flexible API integration"""
     
-    stadium_conditions = {
-        'Kansas City Chiefs': {
-            'temp': 28, 'wind': 18, 'condition': 'Snow Flurries',
-            'humidity': 78, 'precipitation': 20,
-            'strategic_impact': {
-                'passing_efficiency': -0.18,
-                'deep_ball_success': -0.31,
-                'fumble_increase': 0.15,
-                'kicking_accuracy': -0.12,
-                'recommended_adjustments': [
-                    'Increase run calls to 65%',
-                    'Focus on underneath routes',
-                    'Avoid deep posts into wind',
-                    'Use more screens and draws'
-                ]
-            }
-        },
-        'Philadelphia Eagles': {
-            'temp': 34, 'wind': 12, 'condition': 'Partly Cloudy',
-            'humidity': 65, 'precipitation': 5,
-            'strategic_impact': {
-                'passing_efficiency': -0.05,
-                'deep_ball_success': -0.08,
-                'fumble_increase': 0.02,
-                'kicking_accuracy': -0.02,
-                'recommended_adjustments': [
-                    'Minimal weather impact',
-                    'Normal play distribution',
-                    'Slight emphasis on run game'
-                ]
-            }
-        },
-        'Buffalo Bills': {
-            'temp': 22, 'wind': 22, 'condition': 'Heavy Snow',
-            'humidity': 85, 'precipitation': 70,
-            'strategic_impact': {
-                'passing_efficiency': -0.35,
-                'deep_ball_success': -0.55,
-                'fumble_increase': 0.28,
-                'kicking_accuracy': -0.25,
-                'recommended_adjustments': [
-                    'Run game 75% of plays',
-                    'No passes beyond 15 yards',
-                    'Focus on power running',
-                    'Avoid field goals beyond 35 yards'
-                ]
-            }
-        }
+    try:
+        # This would integrate with weather APIs
+        raw_weather = scrape_weather_flexible(team_name)
+        return normalize_weather_data(raw_weather, team_name)
+        
+    except Exception as e:
+        # Fallback weather data
+        return normalize_weather_data({}, team_name)
+
+def scrape_weather_flexible(team_name):
+    """Flexible weather scraping from multiple sources"""
+    
+    # Mock weather data - replace with real weather API calls
+    weather_conditions = {
+        'Kansas City Chiefs': {'temp': 28, 'wind': 18, 'condition': 'Snow Flurries'},
+        'Philadelphia Eagles': {'temp': 34, 'wind': 12, 'condition': 'Partly Cloudy'},
+        'Buffalo Bills': {'temp': 22, 'wind': 22, 'condition': 'Heavy Snow'}
     }
     
-    return stadium_conditions.get(team_name, stadium_conditions['Philadelphia Eagles'])
+    return weather_conditions.get(team_name, {'temp': 65, 'wind': 8})
 
 @st.cache_data(ttl=1800)
 def get_injury_strategic_analysis(team1, team2):
-    """Get injury reports with detailed strategic implications"""
+    """Get injury data with flexible scraping integration"""
     
-    injury_database = {
+    try:
+        raw_injury_data = scrape_injury_data_flexible(team1, team2)
+        return normalize_injury_data(raw_injury_data, team1, team2)
+        
+    except Exception as e:
+        # Fallback with empty injury data
+        return normalize_injury_data({}, team1, team2)
+
+def scrape_injury_data_flexible(team1, team2):
+    """Flexible injury scraping from multiple sources"""
+    
+    # Mock injury data - replace with real injury report scraping
+    injury_reports = {
         'Kansas City Chiefs': [
-            {
-                'player': 'Travis Kelce', 'position': 'TE', 'status': 'Questionable',
-                'injury': 'Ankle', 'snap_percentage': 0.85,
-                'strategic_impact': {
-                    'red_zone_targets': -0.25,
-                    'third_down_conversion': -0.12,
-                    'play_action_effectiveness': -0.18,
-                    'recommended_counters': [
-                        'Increase Noah Gray usage in red zone',
-                        'More RB screens on third down',
-                        'Shift to 11 personnel with extra WR'
-                    ]
-                }
-            },
-            {
-                'player': 'Chris Jones', 'position': 'DT', 'status': 'Probable',
-                'injury': 'Wrist', 'snap_percentage': 0.92,
-                'strategic_impact': {
-                    'pass_rush_effectiveness': -0.15,
-                    'run_defense': -0.08,
-                    'recommended_exploits': [
-                        'Attack interior with power runs',
-                        'Quick slants over middle',
-                        'Increase up-tempo to limit rotation'
-                    ]
-                }
-            }
+            {'player': 'Travis Kelce', 'position': 'TE', 'status': 'Questionable', 'injury': 'Ankle'}
         ],
         'Philadelphia Eagles': [
-            {
-                'player': 'A.J. Brown', 'position': 'WR1', 'status': 'Out',
-                'injury': 'Hamstring', 'snap_percentage': 0.0,
-                'strategic_impact': {
-                    'deep_ball_threat': -0.45,
-                    'red_zone_efficiency': -0.32,
-                    'play_action_success': -0.28,
-                    'recommended_counters': [
-                        'Increase DeVonta Smith targets',
-                        'More TE involvement in passing game',
-                        'Shift to run-heavy approach'
-                    ]
-                }
-            },
-            {
-                'player': 'Lane Johnson', 'position': 'RT', 'status': 'Questionable',
-                'injury': 'Groin', 'snap_percentage': 0.78,
-                'strategic_impact': {
-                    'pass_protection': -0.22,
-                    'run_blocking_right': -0.18,
-                    'recommended_exploits': [
-                        'Speed rush right side',
-                        'Blitz packages targeting RT',
-                        'Run plays away from right side'
-                    ]
-                }
-            }
+            {'player': 'A.J. Brown', 'position': 'WR1', 'status': 'Out', 'injury': 'Hamstring'}
         ]
     }
     
     return {
-        'team1_injuries': injury_database.get(team1, []),
-        'team2_injuries': injury_database.get(team2, [])
+        'team1_injuries': injury_reports.get(team1, []),
+        'team2_injuries': injury_reports.get(team2, [])
     }
 
 # =============================================================================
@@ -642,10 +538,11 @@ st.markdown("""
         border: 1px solid #444 !important;
     }
     
-    /* DROPDOWN OPTIONS - SOLID BACKGROUND */
+    /* DROPDOWN OPTIONS - SOLID BACKGROUND WITH WHITE TEXT */
     .stSelectbox ul,
     section[data-testid="stSidebar"] .stSelectbox ul,
-    div[role="listbox"] {
+    div[role="listbox"],
+    .stSelectbox div[role="listbox"] {
         background-color: #262626 !important;
         border: 1px solid #444 !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.8) !important;
@@ -653,7 +550,8 @@ st.markdown("""
     
     .stSelectbox li,
     section[data-testid="stSidebar"] .stSelectbox li,
-    div[role="option"] {
+    div[role="option"],
+    .stSelectbox div[role="option"] {
         background-color: #262626 !important;
         color: #ffffff !important;
         padding: 8px 12px !important;
@@ -661,8 +559,20 @@ st.markdown("""
     
     .stSelectbox li:hover,
     section[data-testid="stSidebar"] .stSelectbox li:hover,
-    div[role="option"]:hover {
+    div[role="option"]:hover,
+    .stSelectbox div[role="option"]:hover {
         background-color: #333333 !important;
+        color: #ffffff !important;
+    }
+    
+    /* FORCE DROPDOWN TEXT TO WHITE */
+    .stSelectbox option,
+    .stSelectbox ul li,
+    .stSelectbox div[role="option"],
+    section[data-testid="stSidebar"] .stSelectbox option,
+    section[data-testid="stSidebar"] .stSelectbox ul li,
+    section[data-testid="stSidebar"] .stSelectbox div[role="option"] {
+        background-color: #262626 !important;
         color: #ffffff !important;
     }
     
