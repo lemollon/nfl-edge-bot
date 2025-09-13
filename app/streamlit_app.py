@@ -602,7 +602,7 @@ class NFLCoordinatorSimulator:
 # STREAMLIT CONFIGURATION
 # =============================================================================
 st.set_page_config(
-    page_title="NFL Strategic Edge Platform",
+    page_title="GRIT",
     page_icon="🏈",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -619,184 +619,84 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* HEADER BAR FIX - FORCE BLACK */
-    header[data-testid="stHeader"] {
-        background-color: #0a0a0a !important;
-        height: 0px !important;
+    /* NUCLEAR OPTION - FORCE ALL BACKGROUNDS DARK */
+    * {
+        background-color: transparent !important;
+        color: #ffffff !important;
     }
     
-    .stApp > header {
+    /* SPECIFIC APP STRUCTURE ENFORCEMENT */
+    .stApp, .stApp > div, .main, .block-container {
         background-color: #0a0a0a !important;
-        display: none !important;
+        color: #ffffff !important;
     }
     
-    /* TOP TOOLBAR - FORCE BLACK */
-    .stToolbar {
-        background-color: #0a0a0a !important;
-    }
-    
-    /* SIDEBAR - COMPREHENSIVE FIXES */
-    section[data-testid="stSidebar"] {
+    /* SIDEBAR - NUCLEAR APPROACH */
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] > div,
+    section[data-testid="stSidebar"] .stVerticalBlock,
+    section[data-testid="stSidebar"] .element-container,
+    section[data-testid="stSidebar"] > div > div,
+    section[data-testid="stSidebar"] > div > div > div {
         background-color: #1a1a1a !important;
+        color: #ffffff !important;
     }
     
-    section[data-testid="stSidebar"] > div {
-        background-color: #1a1a1a !important;
+    /* TARGET SPECIFIC WHITE CONTAINERS */
+    .css-1d391kg, .css-1y4p8pa, .css-17eq0hr, .css-k1vhr4,
+    .css-10trblm, .css-1629p8f, .css-16idsys, .css-1cpxqw2,
+    .css-1wa3eu0, .css-12oz5g7, .css-1ekf893, .css-1v0mbdj,
+    div[data-baseweb="select"], div[data-baseweb="select"] > div,
+    .css-2b097c-container, .css-yk16xz-control {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border: 1px solid #444 !important;
     }
     
+    /* AGGRESSIVE SELECTBOX FIXING */
+    .stSelectbox, .stSelectbox > div, .stSelectbox > div > div,
+    .stSelectbox > div > div > div, .stSelectbox ul, .stSelectbox li {
+        background-color: #262626 !important;
+        color: #ffffff !important;
+        border-color: #444 !important;
+    }
+    
+    /* SIDEBAR SPECIFIC NUCLEAR OPTION */
     section[data-testid="stSidebar"] * {
-        color: #ffffff !important;
         background-color: transparent !important;
+        color: #ffffff !important;
     }
     
-    /* SIDEBAR SELECTBOX - CRITICAL FIX */
-    section[data-testid="stSidebar"] .stSelectbox > div > div {
+    /* OVERRIDE ANY WHITE BACKGROUNDS */
+    div[style*="background-color: white"],
+    div[style*="background-color: #ffffff"],
+    div[style*="background-color: #fff"],
+    div[style*="background: white"],
+    div[style*="background: #ffffff"],
+    div[style*="background: #fff"] {
+        background-color: #262626 !important;
+        background: #262626 !important;
+        color: #ffffff !important;
+    }
+    
+    /* FORM ELEMENTS */
+    input, textarea, select, button {
         background-color: #262626 !important;
         color: #ffffff !important;
         border: 1px solid #444 !important;
     }
     
-    /* SIDEBAR SELECTBOX DROPDOWN - CRITICAL FIX */
-    section[data-testid="stSidebar"] .stSelectbox > div > div > div {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    /* SIDEBAR SELECTBOX OPTIONS - CRITICAL FIX */
-    section[data-testid="stSidebar"] .stSelectbox ul {
-        background-color: #262626 !important;
-        border: 1px solid #444 !important;
-    }
-    
-    section[data-testid="stSidebar"] .stSelectbox li {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    section[data-testid="stSidebar"] .stSelectbox li:hover {
-        background-color: #333333 !important;
-        color: #ffffff !important;
-    }
-    
-    /* ALL SELECTBOX ELEMENTS - GLOBAL FIX */
-    .stSelectbox > div > div {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    .stSelectbox > div > div > div {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    .stSelectbox ul {
-        background-color: #262626 !important;
-        border: 1px solid #444 !important;
-    }
-    
-    .stSelectbox li {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    .stSelectbox li:hover {
-        background-color: #333333 !important;
-        color: #ffffff !important;
-    }
-    
-    /* DROPDOWN MENU FIXES */
-    div[role="listbox"] {
-        background-color: #262626 !important;
-        border: 1px solid #444 !important;
-    }
-    
-    div[role="option"] {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    div[role="option"]:hover {
-        background-color: #333333 !important;
-        color: #ffffff !important;
-    }
-    
-    /* SIDEBAR FORM ELEMENTS */
-    section[data-testid="stSidebar"] .stTextInput > div > div > input,
-    section[data-testid="stSidebar"] .stTextArea > div > div > textarea,
-    section[data-testid="stSidebar"] .stNumberInput > div > div > input {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    /* SIDEBAR METRIC CONTAINERS */
-    section[data-testid="stSidebar"] div[data-testid="metric-container"] {
-        background-color: #262626 !important;
-        border: 1px solid #444 !important;
-        color: #ffffff !important;
-    }
-    
-    section[data-testid="stSidebar"] div[data-testid="metric-container"] * {
-        color: #ffffff !important;
-        background-color: transparent !important;
-    }
-    
-    /* SIDEBAR SLIDERS */
-    section[data-testid="stSidebar"] .stSlider > div > div > div {
-        background-color: #262626 !important;
-    }
-    
-    /* SIDEBAR CHECKBOXES */
-    section[data-testid="stSidebar"] .stCheckbox > label {
-        color: #ffffff !important;
-    }
-    
-    /* MAIN CONTENT - ALL INPUT FIELDS */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea,
-    .stNumberInput > div > div > input {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    /* CHAT INPUT VISIBILITY FIX */
-    .stChatInput {
-        background-color: #262626 !important;
-    }
-    
-    .stChatInput input {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    /* FILE UPLOADER */
-    .stFileUploader > div > div {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    /* BUTTON STYLING */
+    /* BUTTONS - EXCEPTION */
     .stButton > button {
         background: linear-gradient(90deg, #00ff41 0%, #0066cc 100%) !important;
         color: #000000 !important;
         border: none !important;
         border-radius: 8px !important;
         font-weight: bold !important;
-        transition: all 0.3s ease !important;
     }
     
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(0, 255, 65, 0.3) !important;
-    }
-    
-    /* TAB STYLING */
+    /* TABS */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px !important;
         background-color: #0a0a0a !important;
     }
     
@@ -804,8 +704,6 @@ st.markdown("""
         background-color: #1a1a1a !important;
         color: #ffffff !important;
         border: 1px solid #333 !important;
-        border-radius: 8px !important;
-        font-weight: bold !important;
     }
     
     .stTabs [aria-selected="true"] {
@@ -813,220 +711,36 @@ st.markdown("""
         color: #000000 !important;
     }
     
-    /* METRIC CONTAINERS - GLOBAL */
+    /* METRICS */
     div[data-testid="metric-container"] {
         background-color: #262626 !important;
         border: 1px solid #444 !important;
         color: #ffffff !important;
-        padding: 1rem !important;
-        border-radius: 8px !important;
     }
     
-    div[data-testid="metric-container"] * {
+    /* CHAT */
+    .stChatInput, .stChatInput input, .stChatMessage {
+        background-color: #262626 !important;
         color: #ffffff !important;
-        background-color: transparent !important;
+        border: 1px solid #444 !important;
     }
     
-    /* EXPANDERS - GLOBAL */
-    .streamlit-expanderHeader {
+    /* EXPANDERS */
+    .streamlit-expanderHeader, .streamlit-expanderContent {
         background-color: #1a1a1a !important;
         color: #ffffff !important;
         border: 1px solid #333 !important;
     }
     
-    .streamlit-expanderContent {
-        background-color: #1a1a1a !important;
-        color: #ffffff !important;
+    /* HEADER HIDE */
+    header[data-testid="stHeader"] {
+        display: none !important;
     }
     
-    /* CHAT MESSAGES */
-    .stChatMessage {
-        background-color: #262626 !important;
-        border: 1px solid #444 !important;
-        color: #ffffff !important;
-    }
-    
-    .stChatMessage * {
-        color: #ffffff !important;
-        background-color: transparent !important;
-    }
-    
-    /* DATAFRAME STYLING */
-    .stDataFrame {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    .stDataFrame table {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    .stDataFrame th {
-        background-color: #1a1a1a !important;
-        color: #ffffff !important;
-    }
-    
-    .stDataFrame td {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    /* ALERT MESSAGES */
-    .stAlert {
-        color: #ffffff !important;
-    }
-    
-    div[data-testid="stNotificationContentError"] {
-        background-color: #2d1a1a !important;
-        color: #ffffff !important;
-        border: 1px solid #ff4444 !important;
-    }
-    
-    div[data-testid="stNotificationContentSuccess"] {
-        background-color: #1a2d1a !important;
-        color: #ffffff !important;
-        border: 1px solid #00ff41 !important;
-    }
-    
-    div[data-testid="stNotificationContentWarning"] {
-        background-color: #2d2d1a !important;
-        color: #ffffff !important;
-        border: 1px solid #ffaa00 !important;
-    }
-    
-    div[data-testid="stNotificationContentInfo"] {
-        background-color: #1a1a2d !important;
-        color: #ffffff !important;
-        border: 1px solid #0066cc !important;
-    }
-    
-    /* SLIDERS - GLOBAL */
-    .stSlider {
-        color: #ffffff !important;
-    }
-    
-    .stSlider > div > div > div {
-        background-color: #262626 !important;
-    }
-    
-    /* CHECKBOXES - GLOBAL */
-    .stCheckbox > label {
-        color: #ffffff !important;
-    }
-    
-    /* MULTISELECT */
-    .stMultiSelect > div > div {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    .stMultiSelect ul {
-        background-color: #262626 !important;
-    }
-    
-    .stMultiSelect li {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    /* RADIO BUTTONS */
-    .stRadio > div {
-        background-color: transparent !important;
-    }
-    
-    .stRadio > div > label {
-        color: #ffffff !important;
-    }
-    
-    /* DATE INPUT */
-    .stDateInput > div > div > input {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    /* TIME INPUT */
-    .stTimeInput > div > div > input {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    /* COLOR PICKER */
-    .stColorPicker > div > div > input {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-        border: 1px solid #444 !important;
-    }
-    
-    /* CONTAINERS */
-    .element-container {
-        background-color: transparent !important;
-    }
-    
-    .stContainer {
-        background-color: transparent !important;
-    }
-    
-    /* PLOTLY CHARTS */
-    .js-plotly-plot {
+    /* FINAL NUCLEAR OVERRIDE FOR ANYTHING WHITE */
+    body, html {
         background-color: #0a0a0a !important;
-    }
-    
-    /* FORCE ALL TEXT TO WHITE - GLOBAL OVERRIDE */
-    * {
         color: #ffffff !important;
-    }
-    
-    /* SPECIFIC OVERRIDES - WHITE BACKGROUND ELIMINATION */
-    div[style*="background-color: white"],
-    div[style*="background-color: #ffffff"],
-    div[style*="background-color: #fff"],
-    div[style*="background-color:white"],
-    div[style*="background-color:#ffffff"],
-    div[style*="background-color:#fff"] {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    /* STREAMLIT SPECIFIC WHITE BACKGROUND FIXES */
-    .css-1d391kg,
-    .css-1y4p8pa,
-    .css-17eq0hr,
-    .css-k1vhr4,
-    .css-10trblm,
-    .css-1629p8f,
-    .css-16idsys,
-    .css-1cpxqw2,
-    .css-1wa3eu0 {
-        background-color: #262626 !important;
-        color: #ffffff !important;
-    }
-    
-    /* EXCEPTIONS - KEEP THESE WITH DARK TEXT ON BRIGHT BACKGROUNDS */
-    .stButton > button,
-    .stTabs [aria-selected="true"],
-    .stDownloadButton > button {
-        color: #000000 !important;
-    }
-    
-    /* SUCCESS/WARNING/ERROR TEXT COLORS */
-    .stSuccess {
-        color: #00ff41 !important;
-    }
-    
-    .stWarning {
-        color: #ffaa00 !important;
-    }
-    
-    .stError {
-        color: #ff4444 !important;
-    }
-    
-    .stInfo {
-        color: #0066cc !important;
     }
 </style>
 """, unsafe_allow_html=True)
