@@ -149,112 +149,88 @@ except Exception as e:
 # =============================================================================
 @st.cache_data(ttl=1800)
 def get_nfl_strategic_data(team1, team2):
-    """Get comprehensive strategic data with flexible scraping support"""
+    """Simple strategic data without complex normalization"""
     
-    try:
-        # This is where you would integrate real scraping
-        # For now, using enhanced mock data with flexible structure
-        raw_team_data = scrape_team_data_flexible(team1, team2)
-        
-        # Normalize whatever data we get into standard format
-        team1_normalized = normalize_team_data(raw_team_data.get('team1', {}), team1)
-        team2_normalized = normalize_team_data(raw_team_data.get('team2', {}), team2)
-        
-        return {
-            'team1_data': team1_normalized,
-            'team2_data': team2_normalized
-        }
-        
-    except Exception as e:
-        # Fallback with default strategic data
-        return {
-            'team1_data': normalize_team_data({}, team1),
-            'team2_data': normalize_team_data({}, team2)
-        }
-
-def scrape_team_data_flexible(team1, team2):
-    """Flexible scraping function that adapts to any data source format"""
-    
-    # This function would contain your actual scraping logic
-    # It can handle ESPN, NFL.com, Pro Football Reference, etc.
-    # Returns data in whatever format it finds, normalization happens elsewhere
-    
-    # Mock implementation - replace with real scraping
-    mock_data = {
-        'team1': {
-            'formation_data': {
-                '11_personnel': {'usage': 0.68, 'ypp': 6.2, 'success_rate': 0.72} if team1 == 'Kansas City Chiefs' else {'usage': 0.65, 'ypp': 5.8}
-            },
-            'situational_tendencies': {
-                'third_down_conversion': 0.423 if team1 == 'Kansas City Chiefs' else 0.40,
-                'red_zone_efficiency': 0.678 if team1 == 'Kansas City Chiefs' else 0.60
-            }
+    # Direct data structure - no function calls
+    team_data_simple = {
+        'Kansas City Chiefs': {
+            'formation_data': {'11_personnel': {'usage': 0.68, 'ypp': 6.4, 'success_rate': 0.72}},
+            'situational_tendencies': {'third_down_conversion': 0.423, 'red_zone_efficiency': 0.678},
+            'personnel_advantages': {'te_vs_lb_mismatch': 0.82, 'outside_zone_left': 5.8}
         },
-        'team2': {
-            'formation_data': {
-                '11_personnel': {'usage': 0.71, 'ypp': 5.9} if team2 == 'Philadelphia Eagles' else {'usage': 0.60}
-            },
-            'situational_tendencies': {
-                'third_down_conversion': 0.387 if team2 == 'Philadelphia Eagles' else 0.38
-            }
+        'Philadelphia Eagles': {
+            'formation_data': {'11_personnel': {'usage': 0.71, 'ypp': 5.9, 'success_rate': 0.68}},
+            'situational_tendencies': {'third_down_conversion': 0.387, 'red_zone_efficiency': 0.589},
+            'personnel_advantages': {'te_vs_lb_mismatch': 0.74, 'outside_zone_left': 4.9}
+        },
+        'New York Giants': {
+            'formation_data': {'11_personnel': {'usage': 0.65, 'ypp': 5.2, 'success_rate': 0.62}},
+            'situational_tendencies': {'third_down_conversion': 0.35, 'red_zone_efficiency': 0.52},
+            'personnel_advantages': {'te_vs_lb_mismatch': 0.68, 'outside_zone_left': 4.5}
         }
     }
     
-    return mock_data
+    # Default fallback
+    default_data = {
+        'formation_data': {'11_personnel': {'usage': 0.65, 'ypp': 5.5, 'success_rate': 0.68}},
+        'situational_tendencies': {'third_down_conversion': 0.40, 'red_zone_efficiency': 0.60},
+        'personnel_advantages': {'te_vs_lb_mismatch': 0.75, 'outside_zone_left': 5.0}
+    }
+    
+    return {
+        'team1_data': team_data_simple.get(team1, default_data),
+        'team2_data': team_data_simple.get(team2, default_data)
+    }
 
 @st.cache_data(ttl=3600)
 def get_weather_strategic_impact(team_name):
-    """Get weather data with flexible API integration"""
+    """Simple weather data without normalization"""
     
-    try:
-        # This would integrate with weather APIs
-        raw_weather = scrape_weather_flexible(team_name)
-        return normalize_weather_data(raw_weather, team_name)
-        
-    except Exception as e:
-        # Fallback weather data
-        return normalize_weather_data({}, team_name)
-
-def scrape_weather_flexible(team_name):
-    """Flexible weather scraping from multiple sources"""
-    
-    # Mock weather data - replace with real weather API calls
-    weather_conditions = {
-        'Kansas City Chiefs': {'temp': 28, 'wind': 18, 'condition': 'Snow Flurries'},
-        'Philadelphia Eagles': {'temp': 34, 'wind': 12, 'condition': 'Partly Cloudy'},
-        'Buffalo Bills': {'temp': 22, 'wind': 22, 'condition': 'Heavy Snow'}
+    weather_simple = {
+        'Kansas City Chiefs': {
+            'temp': 28, 'wind': 18, 'condition': 'Snow Flurries',
+            'strategic_impact': {
+                'passing_efficiency': -0.18,
+                'recommended_adjustments': ['Increase run calls to 65%', 'Focus on underneath routes']
+            }
+        },
+        'New York Giants': {
+            'temp': 42, 'wind': 10, 'condition': 'Cloudy',
+            'strategic_impact': {
+                'passing_efficiency': -0.05,
+                'recommended_adjustments': ['Normal play distribution', 'Monitor conditions']
+            }
+        }
     }
     
-    return weather_conditions.get(team_name, {'temp': 65, 'wind': 8})
+    default_weather = {
+        'temp': 65, 'wind': 8, 'condition': 'Fair',
+        'strategic_impact': {
+            'passing_efficiency': -0.02,
+            'recommended_adjustments': ['Ideal conditions']
+        }
+    }
+    
+    return weather_simple.get(team_name, default_weather)
 
 @st.cache_data(ttl=1800)
 def get_injury_strategic_analysis(team1, team2):
-    """Get injury data with flexible scraping integration"""
+    """Simple injury data without complex processing"""
     
-    try:
-        raw_injury_data = scrape_injury_data_flexible(team1, team2)
-        return normalize_injury_data(raw_injury_data, team1, team2)
-        
-    except Exception as e:
-        # Fallback with empty injury data
-        return normalize_injury_data({}, team1, team2)
-
-def scrape_injury_data_flexible(team1, team2):
-    """Flexible injury scraping from multiple sources"""
-    
-    # Mock injury data - replace with real injury report scraping
-    injury_reports = {
+    injury_simple = {
         'Kansas City Chiefs': [
-            {'player': 'Travis Kelce', 'position': 'TE', 'status': 'Questionable', 'injury': 'Ankle'}
+            {'player': 'Travis Kelce', 'position': 'TE', 'status': 'Questionable', 
+             'strategic_impact': {'recommended_counters': ['Increase Noah Gray usage']}}
         ],
-        'Philadelphia Eagles': [
-            {'player': 'A.J. Brown', 'position': 'WR1', 'status': 'Out', 'injury': 'Hamstring'}
+        'New York Giants': [
+            {'player': 'Saquon Barkley', 'position': 'RB', 'status': 'Probable',
+             'strategic_impact': {'recommended_counters': ['Monitor snap count']}}
         ]
     }
     
     return {
-        'team1_injuries': injury_reports.get(team1, []),
-        'team2_injuries': injury_reports.get(team2, [])
+        'team1_injuries': injury_simple.get(team1, []),
+        'team2_injuries': injury_simple.get(team2, [])
     }
 
 # =============================================================================
