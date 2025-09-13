@@ -8,11 +8,12 @@ platform_info = f"""
 - 📐 **Enhanced Strategic Depth** - Route concepts, timing, statistical projections
 - 📚 **Collapsible User Guides** - Clean interface with expandable help sections
 - 🌤️ **Advanced Weather Integration** - Real stadium conditions with nuanced impact calculations
+- 🏟️ **Game Location Weather** - Weather based on actual game location (home/away/neutral)
 - ⚡ **Performance Optimized** - Faster loading and better resource management
 
 **Your Progress:** {st.session_state.get('coordinator_xp', 0):,} XP • Level: {"Belichick" if st.session_state.get('coordinator_xp', 0) >= 2000 else "Elite" if st.session_state.get('coordinator_xp', 0) >= 1000 else "Pro" if st.session_state.get('coordinator_xp', 0) >= 500 else "Developing"} • Streak: {st.session_state.get('analysis_streak', 0)}
 
-**Platform Status:** ✅ Enhanced for Professional Use • ✅ Deep Analysis Active • ✅ All Systems Operational
+**Platform Status:** ✅ Enhanced for Professional Use • ✅ Deep Analysis Active • ✅ Game Location Weather • ✅ All Systems Operational
 """
 
 st.markdown(platform_info)
