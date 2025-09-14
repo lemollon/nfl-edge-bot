@@ -11,7 +11,7 @@ import requests
 import streamlit as st
 from datetime import datetime, timedelta
 import random
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from openai import OpenAI
 from database import init_database
 import sqlite3
