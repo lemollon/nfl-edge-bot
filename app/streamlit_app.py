@@ -131,6 +131,248 @@ class DataIntegrityManager:
 data_manager = DataIntegrityManager()
 
 # =============================================================================
+# ERROR HANDLING SYSTEM - SPECIFIC EXCEPTION TYPES
+# =============================================================================
+
+class ServiceStatus(Enum):
+    OPERATIONAL = "operational"
+    DEGRADED = "degraded"
+    DOWN = "down"
+    UNKNOWN = "unknown"
+
+@dataclass
+class ServiceHealth:
+    name: str
+    status: ServiceStatus
+    message: str
+    last_checked: datetime
+    response_time: Optional[float] = None
+
+class APIError(Exception):
+    """Base class for API-related errors"""
+    pass
+
+class WeatherAPIError(APIError):
+    """Specific error for weather API issues"""
+    pass
+
+class OpenAIAPIError(APIError):
+    """Specific error for OpenAI API issues"""
+    pass
+
+class DataIntegrityError(Exception):
+    """Error for incomplete or invalid data"""
+    pass
+
+class ServiceHealthMonitor:
+    """Monitor and track service health status"""
+    
+    def __init__(self):
+        self.services = {}
+    
+    def check_openai_health(self) -> ServiceHealth:
+        """Check OpenAI API health with specific error handling"""
+        start_time = time.time()
+        
+        try:
+            if "OPENAI_API_KEY" not in st.secrets:
+                return ServiceHealth(
+                    name="OpenAI",
+                    status=ServiceStatus.DOWN,
+                    message="API key not configured",
+                    last_checked=datetime.now()
+                )
+            
+            client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "test"}],
+                max_tokens=5,
+                timeout=10
+            )
+            
+            response_time = time.time() - start_time
+            return ServiceHealth(
+                name="OpenAI",
+                status=ServiceStatus.OPERATIONAL,
+                message="API responding normally",
+                last_checked=datetime.now(),
+                response_time=response_time
+            )
+            
+        except Exception as e:
+            error_msg = str(e).lower()
+            
+            if "401" in error_msg or "unauthorized" in error_msg:
+                status = ServiceStatus.DOWN
+                message = "Invalid API key - please check configuration"
+            elif "429" in error_msg or "rate_limit" in error_msg:
+                status = ServiceStatus.DEGRADED
+                message = "Rate limit exceeded - please wait before retrying"
+            elif "quota" in error_msg:
+                status = ServiceStatus.DOWN
+                message = "API quota exceeded - upgrade plan required"
+            elif "timeout" in error_msg:
+                status = ServiceStatus.DEGRADED
+                message = "API response timeout - service may be slow"
+            else:
+                status = ServiceStatus.DOWN
+                message = f"API error: {str(e)[:100]}"
+            
+            return ServiceHealth(
+                name="OpenAI",
+                status=status,
+                message=message,
+                last_checked=datetime.now(),
+                response_time=time.time() - start_time if time.time() - start_time < 30 else None
+            )
+    
+    def check_weather_health(self) -> ServiceHealth:
+        """Check Weather API health with specific error handling"""
+        start_time = time.time()
+        
+        try:
+            if "OPENWEATHER_API_KEY" not in st.secrets:
+                return ServiceHealth(
+                    name="Weather API",
+                    status=ServiceStatus.DOWN,
+                    message="API key not configured",
+                    last_checked=datetime.now()
+                )
+            
+            api_key = st.secrets["OPENWEATHER_API_KEY"]
+            # Test with Kansas City coordinates
+            test_url = f"http://api.openweathermap.org/data/2.5/weather?lat=39.0489&lon=-94.4839&appid={api_key}&units=imperial"
+            
+            response = requests.get(test_url, timeout=10)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                return ServiceHealth(
+                    name="Weather API",
+                    status=ServiceStatus.OPERATIONAL,
+                    message="API responding normally",
+                    last_checked=datetime.now(),
+                    response_time=response_time
+                )
+            elif response.status_code == 401:
+                return ServiceHealth(
+                    name="Weather API",
+                    status=ServiceStatus.DOWN,
+                    message="Invalid API key - please check configuration",
+                    last_checked=datetime.now()
+                )
+            elif response.status_code == 429:
+                return ServiceHealth(
+                    name="Weather API",
+                    status=ServiceStatus.DEGRADED,
+                    message="Rate limit exceeded - please wait before retrying",
+                    last_checked=datetime.now()
+                )
+            else:
+                return ServiceHealth(
+                    name="Weather API",
+                    status=ServiceStatus.DEGRADED,
+                    message=f"HTTP {response.status_code} - service may be experiencing issues",
+                    last_checked=datetime.now()
+                )
+                
+        except requests.exceptions.Timeout:
+            return ServiceHealth(
+                name="Weather API",
+                status=ServiceStatus.DEGRADED,
+                message="API response timeout - service may be slow",
+                last_checked=datetime.now(),
+                response_time=time.time() - start_time
+            )
+        except requests.exceptions.ConnectionError:
+            return ServiceHealth(
+                name="Weather API",
+                status=ServiceStatus.DOWN,
+                message="Cannot connect to weather service",
+                last_checked=datetime.now()
+            )
+        except Exception as e:
+            return ServiceHealth(
+                name="Weather API",
+                status=ServiceStatus.DOWN,
+                message=f"Unexpected error: {str(e)[:100]}",
+                last_checked=datetime.now()
+            )
+    
+    def update_service_status(self, service_name: str) -> ServiceHealth:
+        """Update and cache service status"""
+        if service_name == "OpenAI":
+            health = self.check_openai_health()
+        elif service_name == "Weather API":
+            health = self.check_weather_health()
+        else:
+            raise ValueError(f"Unknown service: {service_name}")
+        
+        self.services[service_name] = health
+        return health
+    
+    def get_service_status(self, service_name: str) -> ServiceHealth:
+        """Get cached service status or check if stale"""
+        if service_name not in self.services:
+            return self.update_service_status(service_name)
+        
+        cached = self.services[service_name]
+        # Refresh if older than 5 minutes
+        if (datetime.now() - cached.last_checked).seconds > 300:
+            return self.update_service_status(service_name)
+        
+        return cached
+
+# Initialize service monitor
+service_monitor = ServiceHealthMonitor()
+
+# =============================================================================
+# USER NOTIFICATION SYSTEM
+# =============================================================================
+
+def show_user_notification(error_type: str, message: str, suggested_action: str = None):
+    """Show contextual user notifications with suggested actions"""
+    
+    if error_type == "rate_limit":
+        st.warning("⚠️ **Rate Limit Reached**")
+        st.markdown(f"**Issue:** {message}")
+        if suggested_action:
+            st.info(f"**Suggested Action:** {suggested_action}")
+        else:
+            st.info("**Suggested Action:** Please wait a few minutes before trying again, or upgrade your API plan for higher limits.")
+    
+    elif error_type == "api_key":
+        st.error("🔑 **API Configuration Issue**")
+        st.markdown(f"**Issue:** {message}")
+        if suggested_action:
+            st.info(f"**Action Required:** {suggested_action}")
+        else:
+            st.info("**Action Required:** Check your API key configuration in Streamlit secrets.")
+    
+    elif error_type == "timeout":
+        st.warning("⏱️ **Service Timeout**")
+        st.markdown(f"**Issue:** {message}")
+        if suggested_action:
+            st.info(f"**Suggested Action:** {suggested_action}")
+        else:
+            st.info("**Suggested Action:** The service is responding slowly. Try again in a moment.")
+    
+    elif error_type == "data_missing":
+        st.error("📊 **Data Unavailable**")
+        st.markdown(f"**Issue:** {message}")
+        if suggested_action:
+            st.info(f"**Alternative:** {suggested_action}")
+        else:
+            st.info("**Alternative:** Please select teams with complete data, or contact support to add missing data.")
+    
+    else:
+        st.error("❌ **Service Error**")
+        st.markdown(f"**Issue:** {message}")
+        if suggested_action:
+            st.info(f"**Next Steps:** {suggested_action}")
+
+# =============================================================================
 # PHASE 3: COMPLETE NFL STRATEGIC DATABASE
 # =============================================================================
 
@@ -1071,34 +1313,9 @@ def get_historical_games_database():
                     'BAL struggled with KC speed in 11 personnel',
                     'Weather favored passing attack - no wind issues'
                 ]
-            },
-            {
-                'game_id': 'BUF_MIA_2024_W1',
-                'teams': ['Buffalo Bills', 'Miami Dolphins'],
-                'score': [31, 17],
-                'weather': {'temp': 78, 'wind': 12, 'condition': 'Partly Cloudy'},
-                'formations': {
-                    'Buffalo Bills': {
-                        '11_personnel': {'plays': 45, 'yards': 289, 'tds': 3},
-                        '12_personnel': {'plays': 11, 'yards': 52, 'tds': 0}
-                    },
-                    'Miami Dolphins': {
-                        '11_personnel': {'plays': 51, 'yards': 312, 'tds': 2},
-                        '10_personnel': {'plays': 7, 'yards': 67, 'tds': 0}
-                    }
-                },
-                'key_insights': [
-                    'BUF cold weather advantage showed early',
-                    'MIA speed neutralized by wind conditions',
-                    'Power running game dominated in red zone'
-                ]
             }
         ]
     }
-
-# =============================================================================
-# PHASE 3: PLAYER PERFORMANCE DATABASE
-# =============================================================================
 
 def get_player_performance_database():
     """Enhanced player performance tracking"""
@@ -1119,75 +1336,9 @@ def get_player_performance_database():
                     'wind_15plus': {'rating': 102.1, 'games': 5},
                     'dome': {'rating': 115.3, 'games': 12}
                 }
-            },
-            'Josh Allen': {
-                'team': 'Buffalo Bills',
-                'advanced_metrics': {
-                    'pressure_rating': 0.85, 'red_zone_efficiency': 0.74,
-                    'third_down_conversion': 0.64, 'deep_ball_accuracy': 0.69
-                },
-                'formation_splits': {
-                    '11_personnel': {'rating': 109.8, 'td_rate': 0.058},
-                    '21_personnel': {'rating': 104.2, 'td_rate': 0.045}
-                },
-                'weather_performance': {
-                    'cold': {'rating': 114.7, 'games': 12},
-                    'wind_15plus': {'rating': 98.3, 'games': 7},
-                    'snow': {'rating': 118.9, 'games': 4}
-                }
-            }
-        },
-        'running_backs': {
-            'Christian McCaffrey': {
-                'team': 'San Francisco 49ers',
-                'advanced_metrics': {
-                    'yards_after_contact': 3.2, 'missed_tackles_forced': 0.31,
-                    'receiving_efficiency': 0.84, 'red_zone_touches': 0.67
-                },
-                'formation_splits': {
-                    '11_personnel': {'ypc': 5.8, 'td_rate': 0.089},
-                    '21_personnel': {'ypc': 4.9, 'td_rate': 0.067}
-                }
             }
         }
     }
-
-# =============================================================================
-# PHASE 3: AUTOMATED DATA UPDATE PIPELINES
-# =============================================================================
-
-class DataUpdatePipeline:
-    """Automated data refresh and validation system"""
-    
-    def __init__(self):
-        self.update_schedules = {
-            'injury_reports': {'frequency': 'daily', 'time': '08:00'},
-            'weather_data': {'frequency': 'hourly', 'game_day_only': True},
-            'player_performance': {'frequency': 'weekly', 'day': 'tuesday'},
-            'team_analytics': {'frequency': 'weekly', 'day': 'wednesday'}
-        }
-        self.data_sources = {
-            'weather': 'openweathermap',
-            'injuries': 'nfl_official',
-            'stats': 'nfl_nextgen'
-        }
-    
-    def check_data_freshness(self, dataset_name: str) -> bool:
-        """Check if data needs updating"""
-        rules = data_manager.validation_rules.get(dataset_name, {})
-        max_age_hours = rules.get('max_age_hours', 24)
-        
-        health = data_manager.data_health.get(dataset_name)
-        if not health:
-            return True  # No data exists, needs update
-        
-        age_hours = (datetime.now() - health.last_updated).total_seconds() / 3600
-        return age_hours > max_age_hours
-    
-    def validate_data_integrity(self, dataset_name: str, data: Dict) -> bool:
-        """Validate data meets quality standards"""
-        health = data_manager.validate_dataset(dataset_name, data)
-        return health.status in [DataStatus.COMPLETE, DataStatus.PARTIAL]
 
 # =============================================================================
 # ENHANCED DATA FUNCTIONS WITH PHASE 3 INTEGRATION
@@ -1219,6 +1370,101 @@ def get_nfl_strategic_data(team1: str, team2: str) -> dict:
         'data_completeness': 1.0,
         'last_updated': datetime.now().isoformat()
     }
+
+def get_live_weather_data(team_name: str) -> dict:
+    """Get live weather data with specific error handling"""
+    
+    if team_name not in NFL_STADIUM_LOCATIONS:
+        raise DataIntegrityError(f"Stadium location not found for {team_name}")
+    
+    stadium_info = NFL_STADIUM_LOCATIONS[team_name]
+    
+    # Handle dome stadiums
+    if stadium_info['dome']:
+        return {
+            'temp': 72, 'wind': 0, 'condition': 'Dome - Controlled Environment',
+            'precipitation': 0,
+            'strategic_impact': {
+                'passing_efficiency': 0.02, 'deep_ball_success': 0.05,
+                'fumble_increase': -0.05, 'kicking_accuracy': 0.03,
+                'recommended_adjustments': ['Ideal dome conditions - full playbook available']
+            },
+            'data_source': 'dome'
+        }
+    
+    # Check weather service health first
+    weather_health = service_monitor.get_service_status("Weather API")
+    
+    if weather_health.status == ServiceStatus.DOWN:
+        raise WeatherAPIError(f"Weather service unavailable: {weather_health.message}")
+    
+    # Get live weather data
+    api_key = st.secrets["OPENWEATHER_API_KEY"]
+    lat = stadium_info['lat']
+    lon = stadium_info['lon']
+    
+    url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=imperial"
+    
+    try:
+        response = requests.get(url, timeout=15)
+        
+        if response.status_code == 401:
+            raise WeatherAPIError("Invalid weather API key")
+        elif response.status_code == 429:
+            raise WeatherAPIError("Weather API rate limit exceeded")
+        elif response.status_code != 200:
+            raise WeatherAPIError(f"Weather API returned HTTP {response.status_code}")
+        
+        data = response.json()
+        
+        # Validate response data
+        if 'main' not in data or 'wind' not in data or 'weather' not in data:
+            raise WeatherAPIError("Invalid weather data format received")
+        
+        temp = int(data['main']['temp'])
+        wind_speed = int(data.get('wind', {}).get('speed', 0))
+        condition = data['weather'][0]['description'].title()
+        
+        precipitation = 0
+        if 'rain' in data:
+            precipitation = min(data.get('rain', {}).get('1h', 0) * 100, 100)
+        elif 'snow' in data:
+            precipitation = min(data.get('snow', {}).get('1h', 0) * 100, 100)
+        
+        # Calculate strategic impact
+        wind_factor = wind_speed / 10.0
+        temp_factor = abs(65 - temp) / 100.0
+        
+        strategic_impact = {
+            'passing_efficiency': -0.02 * wind_factor - 0.01 * temp_factor,
+            'deep_ball_success': -0.05 * wind_factor,
+            'fumble_increase': 0.01 * temp_factor + 0.02 * (precipitation / 100),
+            'kicking_accuracy': -0.03 * wind_factor,
+            'recommended_adjustments': []
+        }
+        
+        if wind_speed > 15:
+            strategic_impact['recommended_adjustments'].append('Emphasize running game and short passes')
+        if temp < 32:
+            strategic_impact['recommended_adjustments'].append('Focus on ball security - cold weather increases fumbles')
+        if precipitation > 20:
+            strategic_impact['recommended_adjustments'].append('Adjust for wet conditions - slippery field')
+        
+        if not strategic_impact['recommended_adjustments']:
+            strategic_impact['recommended_adjustments'] = ['Favorable conditions for balanced attack']
+        
+        return {
+            'temp': temp, 'wind': wind_speed, 'condition': condition,
+            'precipitation': int(precipitation), 'strategic_impact': strategic_impact,
+            'data_source': 'live_api'
+        }
+        
+    except requests.exceptions.Timeout:
+        raise WeatherAPIError("Weather API request timed out")
+    except requests.exceptions.ConnectionError:
+        raise WeatherAPIError("Cannot connect to weather service")
+    except json.JSONDecodeError:
+        raise WeatherAPIError("Invalid response format from weather API")
 
 def get_enhanced_weather_data(team_name: str) -> dict:
     """Enhanced weather data with historical context"""
@@ -1313,158 +1559,6 @@ def get_enhanced_weather_fallback(team_name: str, stadium_info: dict) -> dict:
         'data_source': 'seasonal_fallback',
         'elevation_impact': calculate_elevation_impact(stadium_info['elevation'])
     }
-
-# =============================================================================
-# PHASE 3: DATA DASHBOARD AND MONITORING
-# =============================================================================
-
-def display_comprehensive_data_dashboard():
-    """Comprehensive data health and completeness dashboard"""
-    
-    st.markdown("### 📊 Data Integrity Dashboard - Phase 3")
-    
-    # Overall system health
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        team_completeness = len(NFL_STRATEGIC_DATA) / 32
-        st.metric("Team Data", f"{len(NFL_STRATEGIC_DATA)}/32", f"{team_completeness:.1%}")
-    
-    with col2:
-        stadium_completeness = len(NFL_STADIUM_LOCATIONS) / 32
-        st.metric("Stadium Data", f"{len(NFL_STADIUM_LOCATIONS)}/32", f"{stadium_completeness:.1%}")
-    
-    with col3:
-        historical_games = len(get_historical_games_database().get('week_1_2024', []))
-        st.metric("Historical Games", historical_games, "Sample Data")
-    
-    with col4:
-        player_data = len(get_player_performance_database().get('quarterbacks', {}))
-        st.metric("Player Profiles", player_data, "QB Focus")
-    
-    # Detailed data health
-    st.markdown("#### Dataset Health Status")
-    
-    # Mock data health for demonstration
-    datasets = [
-        {'name': 'Team Strategic Data', 'status': 'Complete', 'completeness': 1.0, 'records': 32},
-        {'name': 'Stadium Information', 'status': 'Complete', 'completeness': 1.0, 'records': 32},
-        {'name': 'Weather Integration', 'status': 'Operational', 'completeness': 0.95, 'records': 'Live'},
-        {'name': 'Historical Games', 'status': 'Partial', 'completeness': 0.15, 'records': 2},
-        {'name': 'Player Performance', 'status': 'Partial', 'completeness': 0.25, 'records': 3},
-        {'name': 'Injury Reports', 'status': 'Missing', 'completeness': 0.0, 'records': 0}
-    ]
-    
-    for dataset in datasets:
-        col1, col2, col3, col4 = st.columns([3, 2, 2, 2])
-        
-        with col1:
-            st.write(dataset['name'])
-        
-        with col2:
-            if dataset['status'] == 'Complete':
-                st.success(dataset['status'])
-            elif dataset['status'] == 'Operational':
-                st.success(dataset['status'])
-            elif dataset['status'] == 'Partial':
-                st.warning(dataset['status'])
-            else:
-                st.error(dataset['status'])
-        
-        with col3:
-            st.progress(dataset['completeness'])
-            st.caption(f"{dataset['completeness']:.1%}")
-        
-        with col4:
-            st.write(str(dataset['records']))
-    
-    # Data validation summary
-    st.markdown("#### Validation Status")
-    
-    validation_checks = [
-        "✅ All 32 NFL teams have strategic formation data",
-        "✅ Complete stadium location and weather data",
-        "✅ Formation usage rates and success metrics validated",
-        "✅ Weather API integration with fallback systems",
-        "⚠️ Historical game database needs expansion",
-        "⚠️ Player performance tracking in development",
-        "❌ Real-time injury report integration pending"
-    ]
-    
-    for check in validation_checks:
-        st.write(check)
-
-# =============================================================================
-# CONFIGURATION & STARTUP VALIDATION
-# =============================================================================
-
-st.set_page_config(
-    page_title="GRIT v3.5 - Phase 3 Data Integrity",
-    page_icon="⚡",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# Initialize session state
-def initialize_session_state():
-    required_keys = {
-        'coordinator_xp': 0,
-        'analysis_streak': 0,
-        'coach_chat': [],
-        'last_error': None,
-        'service_notifications_enabled': True,
-        'data_validation_passed': False
-    }
-    
-    for key, default_value in required_keys.items():
-        if key not in st.session_state:
-            st.session_state[key] = default_value
-
-initialize_session_state()
-
-# Phase 3 Data Validation
-def validate_phase3_data():
-    """Validate Phase 3 data completeness"""
-    validation_results = []
-    
-    # Check team data completeness
-    if len(NFL_STRATEGIC_DATA) == 32:
-        validation_results.append("✅ Complete strategic data for all 32 NFL teams")
-    else:
-        validation_results.append(f"❌ Missing strategic data: {32 - len(NFL_STRATEGIC_DATA)} teams")
-    
-    # Check stadium data completeness
-    if len(NFL_STADIUM_LOCATIONS) == 32:
-        validation_results.append("✅ Complete stadium and location data")
-    else:
-        validation_results.append(f"❌ Missing stadium data: {32 - len(NFL_STADIUM_LOCATIONS)} teams")
-    
-    # Check data structure integrity
-    sample_team = list(NFL_STRATEGIC_DATA.keys())[0]
-    required_fields = ['formation_data', 'situational_tendencies', 'personnel_advantages', 'coaching_tendencies']
-    
-    if all(field in NFL_STRATEGIC_DATA[sample_team] for field in required_fields):
-        validation_results.append("✅ Strategic data structure validated")
-    else:
-        validation_results.append("❌ Strategic data structure incomplete")
-    
-    return validation_results
-
-# Import required modules with Phase 3 error handling
-try:
-    from rag import SimpleRAG
-    from feeds import fetch_news
-    from player_news import fetch_player_news
-    from prompts import SYSTEM_PROMPT, EDGE_INSTRUCTIONS
-    st.session_state['modules_loaded'] = True
-except ImportError as e:
-    st.error(f"⚠️ Module dependency: {e}")
-    st.info("Phase 3 can operate with reduced functionality")
-    st.session_state['modules_loaded'] = False
-
-# =============================================================================
-# ENHANCED STRATEGIC ANALYSIS WITH PHASE 3 DATA
-# =============================================================================
 
 def generate_enhanced_strategic_analysis(team1: str, team2: str, question: str, strategic_data: dict, weather_data: dict) -> str:
     """Enhanced strategic analysis using Phase 3 complete datasets"""
@@ -1585,8 +1679,75 @@ Focus on {team1}'s {team1_data['personnel_advantages']['outside_zone_left']:.1f}
 **CONFIDENCE LEVEL: 87%** - Based on complete Phase 3 strategic database
 """
 
+def validate_phase3_data():
+    """Validate Phase 3 data completeness"""
+    validation_results = []
+    
+    # Check team data completeness
+    if len(NFL_STRATEGIC_DATA) == 32:
+        validation_results.append("✅ Complete strategic data for all 32 NFL teams")
+    else:
+        validation_results.append(f"❌ Missing strategic data: {32 - len(NFL_STRATEGIC_DATA)} teams")
+    
+    # Check stadium data completeness
+    if len(NFL_STADIUM_LOCATIONS) == 32:
+        validation_results.append("✅ Complete stadium and location data")
+    else:
+        validation_results.append(f"❌ Missing stadium data: {32 - len(NFL_STADIUM_LOCATIONS)} teams")
+    
+    # Check data structure integrity
+    sample_team = list(NFL_STRATEGIC_DATA.keys())[0]
+    required_fields = ['formation_data', 'situational_tendencies', 'personnel_advantages', 'coaching_tendencies']
+    
+    if all(field in NFL_STRATEGIC_DATA[sample_team] for field in required_fields):
+        validation_results.append("✅ Strategic data structure validated")
+    else:
+        validation_results.append("❌ Strategic data structure incomplete")
+    
+    return validation_results
+
 # =============================================================================
-# INTERFACE WITH PHASE 3 ENHANCEMENTS
+# CONFIGURATION & STARTUP
+# =============================================================================
+
+st.set_page_config(
+    page_title="GRIT v3.5 - Phase 3 Data Integrity",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Initialize session state
+def initialize_session_state():
+    required_keys = {
+        'coordinator_xp': 0,
+        'analysis_streak': 0,
+        'coach_chat': [],
+        'last_error': None,
+        'service_notifications_enabled': True,
+        'data_validation_passed': False
+    }
+    
+    for key, default_value in required_keys.items():
+        if key not in st.session_state:
+            st.session_state[key] = default_value
+
+initialize_session_state()
+
+# Import required modules with Phase 3 error handling
+try:
+    from rag import SimpleRAG
+    from feeds import fetch_news
+    from player_news import fetch_player_news
+    from prompts import SYSTEM_PROMPT, EDGE_INSTRUCTIONS
+    st.session_state['modules_loaded'] = True
+except ImportError as e:
+    st.warning(f"⚠️ Module dependency: {e}")
+    st.info("Phase 3 can operate with reduced functionality")
+    st.session_state['modules_loaded'] = False
+
+# =============================================================================
+# MAIN INTERFACE HEADER
 # =============================================================================
 
 st.markdown("""
@@ -1605,30 +1766,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Phase 3 validation status
-validation_results = validate_phase3_data()
-with st.expander("🔍 Phase 3 Data Validation Status", expanded=False):
-    for result in validation_results:
-        st.write(result)
-    
-    if all("✅" in result for result in validation_results):
-        st.success("✅ Phase 3 Data Integrity: COMPLETE")
-        st.session_state['data_validation_passed'] = True
-    else:
-        st.warning("⚠️ Phase 3 Data Integrity: Validation Issues Detected")
+# =============================================================================
+# TAB STRUCTURE - ORGANIZED INTERFACE
+# =============================================================================
 
-# Enhanced service health dashboard
-if st.session_state.get('service_notifications_enabled', True):
-    with st.expander("🔍 Service Health Dashboard", expanded=False):
-        display_service_health_dashboard()
-        st.markdown("---")
-        display_comprehensive_data_dashboard()
-        
-        if st.button("Refresh All Systems"):
-            service_monitor.update_service_status("OpenAI")
-            service_monitor.update_service_status("Weather API")
-            st.success("🔄 All systems refreshed")
-            st.rerun()
+# Create main tabs
+tab1, tab2, tab3, tab4 = st.tabs(["🏈 Strategic Analysis", "📊 Data Dashboard", "🔧 System Health", "⚙️ Settings"])
 
 # Enhanced sidebar with Phase 3 features
 with st.sidebar:
@@ -1644,23 +1787,33 @@ with st.sidebar:
     weather_team = st.selectbox("Weather Analysis For", [selected_team1, selected_team2], index=0)
     
     # Phase 3 features
-    st.markdown("### Phase 3 Features")
+    st.markdown("### Analysis Options")
     show_formation_details = st.checkbox("Formation Breakdown", value=True)
     show_historical_context = st.checkbox("Historical Context", value=False)
     show_player_insights = st.checkbox("Player Insights", value=False)
     
-    # Data health indicator
-    st.markdown("### Data Health")
-    if st.session_state.get('data_validation_passed', False):
-        st.success("✅ Complete Dataset")
-        st.caption("32/32 teams validated")
-    else:
-        st.warning("⚠️ Validation Pending")
+    # Quick data health indicator
+    st.markdown("### System Status")
+    try:
+        team_count = len(NFL_STRATEGIC_DATA)
+        if team_count == 32:
+            st.success(f"✅ {team_count}/32 Teams")
+        else:
+            st.warning(f"⚠️ {team_count}/32 Teams")
+    except:
+        st.error("❌ Data Loading")
 
-# Main analysis area
-col1, col2 = st.columns([2, 1])
+# =============================================================================
+# TAB 1: STRATEGIC ANALYSIS
+# =============================================================================
 
-with col1:
+with tab1:
+    st.markdown("## Enhanced Strategic Analysis")
+    
+    # Main analysis area
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
         # Strategic Consultation Interface
         st.markdown("### Strategic Consultation")
         
@@ -1968,145 +2121,4 @@ with tab2:
         {'name': 'Team Strategic Data', 'status': 'Complete', 'completeness': 1.0, 'records': 32},
         {'name': 'Stadium Information', 'status': 'Complete', 'completeness': 1.0, 'records': 32},
         {'name': 'Weather Integration', 'status': 'Operational', 'completeness': 0.95, 'records': 'Live'},
-        {'name': 'Historical Games', 'status': 'Partial', 'completeness': 0.15, 'records': 2},
-        {'name': 'Player Performance', 'status': 'Partial', 'completeness': 0.25, 'records': 3},
-        {'name': 'Injury Reports', 'status': 'Missing', 'completeness': 0.0, 'records': 0}
-    ]
-    
-    for dataset in datasets:
-        col1, col2, col3, col4 = st.columns([3, 2, 2, 2])
-        
-        with col1:
-            st.write(dataset['name'])
-        
-        with col2:
-            if dataset['status'] == 'Complete':
-                st.success(dataset['status'])
-            elif dataset['status'] == 'Operational':
-                st.success(dataset['status'])
-            elif dataset['status'] == 'Partial':
-                st.warning(dataset['status'])
-            else:
-                st.error(dataset['status'])
-        
-        with col3:
-            st.progress(dataset['completeness'])
-            st.caption(f"{dataset['completeness']:.1%}")
-        
-        with col4:
-            st.write(str(dataset['records']))
-
-# =============================================================================
-# TAB 3: SYSTEM HEALTH
-# =============================================================================
-
-with tab3:
-    st.markdown("## 🔧 System Health Monitoring")
-    
-    # Service health dashboard
-    try:
-        st.markdown("### API Service Status")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            openai_health = service_monitor.get_service_status("OpenAI")
-            
-            if openai_health.status == ServiceStatus.OPERATIONAL:
-                st.success(f"✅ OpenAI API: {openai_health.message}")
-                if openai_health.response_time:
-                    st.caption(f"Response time: {openai_health.response_time:.2f}s")
-            elif openai_health.status == ServiceStatus.DEGRADED:
-                st.warning(f"⚠️ OpenAI API: {openai_health.message}")
-                st.caption("Strategic analysis may be slower than usual")
-            else:
-                st.error(f"❌ OpenAI API: {openai_health.message}")
-                st.caption("Strategic analysis unavailable")
-        
-        with col2:
-            weather_health = service_monitor.get_service_status("Weather API")
-            
-            if weather_health.status == ServiceStatus.OPERATIONAL:
-                st.success(f"✅ Weather API: {weather_health.message}")
-                if weather_health.response_time:
-                    st.caption(f"Response time: {weather_health.response_time:.2f}s")
-            elif weather_health.status == ServiceStatus.DEGRADED:
-                st.warning(f"⚠️ Weather API: {weather_health.message}")
-                st.caption("Weather data may be delayed")
-            else:
-                st.error(f"❌ Weather API: {weather_health.message}")
-                st.caption("Using fallback weather data")
-        
-        st.caption(f"Last updated: {max(openai_health.last_checked, weather_health.last_checked).strftime('%H:%M:%S')}")
-        
-        if st.button("🔄 Refresh Service Status", key="refresh_services"):
-            service_monitor.update_service_status("OpenAI")
-            service_monitor.update_service_status("Weather API")
-            st.success("🔄 All services refreshed")
-            st.rerun()
-    
-    except Exception as e:
-        st.error(f"Error checking service health: {str(e)}")
-    
-    # System testing
-    st.markdown("### System Testing")
-    
-    col_test1, col_test2 = st.columns(2)
-    
-    with col_test1:
-        if st.button("🧪 Test Weather API", key="test_weather"):
-            try:
-                weather_data = get_enhanced_weather_data(weather_team)
-                st.success(f"✅ Weather API: {weather_data['temp']}°F, {weather_data['condition']}")
-            except WeatherAPIError as e:
-                show_user_notification("timeout", str(e))
-            except Exception as e:
-                st.error(f"Weather test failed: {str(e)}")
-    
-    with col_test2:
-        if st.button("🧪 Test OpenAI API", key="test_openai"):
-            try:
-                # Simple test
-                test_data = {'team1_data': {}, 'team2_data': {}}
-                test_weather = {'temp': 70, 'wind': 5, 'condition': 'Clear', 'strategic_impact': {'recommended_adjustments': ['Test condition']}}
-                analysis = generate_enhanced_strategic_analysis("Test Team 1", "Test Team 2", "Test question", test_data, test_weather)
-                st.success("✅ OpenAI API responding normally")
-            except OpenAIAPIError as e:
-                if "rate_limit" in str(e).lower():
-                    show_user_notification("rate_limit", str(e))
-                else:
-                    show_user_notification("api_key", str(e))
-            except Exception as e:
-                st.error(f"OpenAI test failed: {str(e)}")
-
-# =============================================================================
-# TAB 4: SETTINGS
-# =============================================================================
-
-with tab4:
-    st.markdown("## ⚙️ Settings & Configuration")
-    
-    st.markdown("### Notification Preferences")
-    st.session_state['service_notifications_enabled'] = st.checkbox(
-        "Enable Service Notifications", 
-        value=st.session_state.get('service_notifications_enabled', True),
-        help="Show service health notifications and warnings"
-    )
-    
-    st.markdown("### Analysis Options")
-    default_formation_details = st.checkbox("Show Formation Details by Default", value=True)
-    default_weather_analysis = st.checkbox("Include Weather Analysis by Default", value=True)
-    
-    st.markdown("### Data Sources")
-    st.write("**Strategic Data:** Internal Phase 3 Database (32/32 teams)")
-    st.write("**Weather Data:** OpenWeatherMap API + Fallback System")
-    st.write("**AI Analysis:** OpenAI GPT-3.5 Turbo + Comprehensive Fallbacks")
-    
-    st.markdown("### System Information")
-    st.write("**Version:** GRIT v3.5 - Phase 3 Data Integrity")
-    st.write("**Phase 1:** ✅ Fail Fast Architecture")
-    st.write("**Phase 2:** ✅ Error Handling & Monitoring")
-    st.write("**Phase 3:** ✅ Complete Data Integrity")
-
-# Phase 3 completion status footer
-st.markdown("---")
+        {'name':
