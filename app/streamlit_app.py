@@ -18,7 +18,8 @@ PERFORMANCE: SQLite caching, lazy loading, optimized session state
 BUG FIXES APPLIED:
 - Line 120: Added safe session state initialization
 - Line 125: Added session state safety helper function
-- Line 527: Fixed session state access error
+- Line 400-500: Fixed analysis generation with comprehensive error handling
+- Line 527: Fixed weather data access error
 - All session state access: Added safety checks
 """
 
@@ -54,8 +55,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enhanced dark theme CSS with white text
-# Enhanced dark theme CSS with white text - REPLACE LINES 42-165
+# Enhanced dark theme CSS with white text - BUG FIX: Complete sidebar and dropdown styling
 st.markdown("""
 <style>
     /* CRITICAL STYLING PRINCIPLES */
@@ -562,7 +562,7 @@ tab_analysis, tab_intelligence, tab_tools, tab_education = st.tabs([
 ])
 
 # =============================================================================
-# TAB 1: STRATEGIC ANALYSIS HUB
+# TAB 1: STRATEGIC ANALYSIS HUB - BUG FIX: Lines 400-500
 # =============================================================================
 
 with tab_analysis:
@@ -587,7 +587,7 @@ with tab_analysis:
     col_main, col_sidebar_info = st.columns([2, 1])
     
     with col_main:
-        # Analysis execution
+        # Analysis execution - BUG FIX: Enhanced error handling and validation
         if analyze_button or strategic_question:
             if not strategic_question:
                 teams = get_session_state_safely('selected_teams', {'team1': None, 'team2': None, 'weather_team': None})
@@ -596,65 +596,140 @@ with tab_analysis:
             
             with st.spinner("🔍 Analyzing strategic situation..."):
                 try:
-                    # Get comprehensive data - BUG FIX: Safe access
+                    # BUG FIX: Comprehensive data validation before analysis
                     teams = get_session_state_safely('selected_teams', {'team1': None, 'team2': None, 'weather_team': None})
-                    team1_data = get_team_data(teams['team1'])
-                    team2_data = get_team_data(teams['team2'])
+                    
+                    # Validate team selection
+                    if not teams.get('team1') or not teams.get('team2'):
+                        st.error("Please select both teams in the sidebar before generating analysis.")
+                        st.stop()
+                    
+                    # Get team data with validation
+                    try:
+                        team1_data = get_team_data(teams['team1'])
+                        team2_data = get_team_data(teams['team2'])
+                    except Exception as db_error:
+                        st.error(f"Database error: {str(db_error)}")
+                        st.info("Try refreshing the page or selecting different teams.")
+                        st.stop()
+                    
+                    # BUG FIX: Validate team data exists and is properly formatted
+                    if not team1_data:
+                        st.error(f"No data available for {teams['team1']}. Check database connection.")
+                        st.stop()
+                    
+                    if not team2_data:
+                        st.error(f"No data available for {teams['team2']}. Check database connection.")
+                        st.stop()
+                    
+                    # Validate team data structure
+                    if not isinstance(team1_data, dict) or not isinstance(team2_data, dict):
+                        st.error("Invalid team data format. Database may be corrupted.")
+                        st.stop()
                     
                     # Get weather data with comprehensive fallback
-                    team1_stadium = team1_data.get('stadium_info', {}) if team1_data else {}
-                    weather_data = get_comprehensive_weather_data(
-                        teams['weather_team'],
-                        team1_stadium.get('city', 'Unknown'),
-                        team1_stadium.get('state', 'Unknown'),
-                        team1_stadium.get('is_dome', False)
-                    )
+                    try:
+                        team1_stadium = team1_data.get('stadium_info', {}) if team1_data else {}
+                        weather_data = get_comprehensive_weather_data(
+                            teams['weather_team'],
+                            team1_stadium.get('city', 'Unknown'),
+                            team1_stadium.get('state', 'Unknown'),
+                            team1_stadium.get('is_dome', False)
+                        )
+                    except Exception as weather_error:
+                        st.warning(f"Weather data unavailable: {str(weather_error)}")
+                        # Provide default weather data
+                        weather_data = {
+                            'temp': 70,
+                            'condition': 'Unknown',
+                            'wind_speed': 0,
+                            'source': 'Default',
+                            'error': str(weather_error)
+                        }
                     
                     # Store weather data in session state - BUG FIX: Safe storage
                     if hasattr(st.session_state, 'current_weather_data'):
                         st.session_state.current_weather_data = weather_data
                     
-                    # Generate enhanced analysis
+                    # Get analysis preferences and game situation safely
                     preferences = get_session_state_safely('analysis_preferences', {
                         'complexity_level': 'Advanced',
                         'coaching_perspective': 'Head Coach',
                         'analysis_type': 'Edge Detection'
                     })
+                    
                     game_situation = get_session_state_safely('game_situation', {
                         'down': 1, 'distance': 10, 'field_position': 50,
                         'score_differential': 0, 'time_remaining': '15:00'
                     })
                     
-                    analysis = generate_advanced_strategic_analysis(
-                        teams['team1'], teams['team2'], strategic_question, preferences['analysis_type'],
-                        team1_data, team2_data, weather_data,
-                        game_situation, preferences['coaching_perspective'], 
-                        preferences['complexity_level']
-                    )
+                    # BUG FIX: Generate enhanced analysis with comprehensive error handling
+                    try:
+                        analysis = generate_advanced_strategic_analysis(
+                            teams['team1'], teams['team2'], strategic_question, preferences['analysis_type'],
+                            team1_data, team2_data, weather_data,
+                            game_situation, preferences['coaching_perspective'], 
+                            preferences['complexity_level']
+                        )
+                        
+                        # Validate analysis response
+                        if not analysis or analysis.startswith("Error:") or analysis.startswith("Analysis generation failed"):
+                            st.error("Analysis generation failed. Please try:")
+                            st.info("• Selecting different teams")
+                            st.info("• Simplifying your question")
+                            st.info("• Refreshing the page")
+                            if analysis:
+                                st.error(f"Details: {analysis}")
+                        else:
+                            # Display successful analysis
+                            st.markdown(analysis)
+                            
+                            # Store analysis in session state
+                            if hasattr(st.session_state, 'last_analysis'):
+                                st.session_state.last_analysis = {
+                                    'question': strategic_question,
+                                    'analysis': analysis,
+                                    'timestamp': datetime.now(),
+                                    'teams': f"{teams['team1']} vs {teams['team2']}"
+                                }
+                            
+                            # Save to database for chat history
+                            try:
+                                save_chat_message(
+                                    get_session_state_safely('session_id', str(uuid.uuid4())),
+                                    "analysis",
+                                    f"Q: {strategic_question}\n\nA: {analysis}",
+                                    preferences['analysis_type']
+                                )
+                            except Exception as db_save_error:
+                                st.warning(f"Could not save to chat history: {str(db_save_error)}")
+                            
+                            st.success("✅ Strategic Analysis Complete!")
                     
-                    st.markdown(analysis)
-                    
-                    # Store analysis in session state and database
-                    if hasattr(st.session_state, 'last_analysis'):
-                        st.session_state.last_analysis = {
-                            'question': strategic_question,
-                            'analysis': analysis,
-                            'timestamp': datetime.now(),
-                            'teams': f"{teams['team1']} vs {teams['team2']}"
-                        }
-                    
-                    # Save to database for chat history
-                    save_chat_message(
-                        get_session_state_safely('session_id', str(uuid.uuid4())),
-                        "analysis",
-                        f"Q: {strategic_question}\n\nA: {analysis}",
-                        preferences['analysis_type']
-                    )
-                    
-                    st.success("✅ Strategic Analysis Complete!")
-                    
-                except Exception as e:
-                    st.error(f"Analysis generation failed: {str(e)}")
+                    except Exception as analysis_error:
+                        st.error("Analysis generation encountered an error:")
+                        st.error(str(analysis_error))
+                        st.info("This may be due to:")
+                        st.info("• Missing formation data in database")
+                        st.info("• API service unavailability") 
+                        st.info("• Invalid team data structure")
+                        
+                        # Show debug information
+                        with st.expander("Debug Information"):
+                            st.write(f"Team 1: {teams['team1']}")
+                            st.write(f"Team 2: {teams['team2']}")
+                            st.write(f"Team 1 Data Keys: {list(team1_data.keys()) if team1_data else 'None'}")
+                            st.write(f"Team 2 Data Keys: {list(team2_data.keys()) if team2_data else 'None'}")
+                            st.write(f"Weather Data: {weather_data}")
+                            st.write(f"Error: {str(analysis_error)}")
+                        
+                except Exception as outer_error:
+                    st.error("Critical error in analysis system:")
+                    st.error(str(outer_error))
+                    st.info("Please try refreshing the page. If the problem persists, check:")
+                    st.info("• Database connectivity")
+                    st.info("• Team data integrity")
+                    st.info("• System logs for detailed error information")
         
         # Strategic Chat Interface
         st.markdown("### Strategic Consultation Chat")
