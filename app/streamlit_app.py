@@ -1148,20 +1148,3 @@ with tab_coach:
                 st.session_state.coach_chat.append(("assistant", ans))
                 
                 increment_analysis_streak()
-                award_xp(base_xp, "Strategic Consultation")
-
-# =============================================================================
-# STRATEGIC NEWS
-# =============================================================================
-
-with tab_news:
-    st.markdown("## Strategic Intelligence Center")
-    st.markdown("*Breaking news with tactical impact analysis*")
-    
-    st.markdown("### 🚨 Breaking Strategic Intelligence")
-    
-    breaking_intel = []
-    
-    if selected_weather['wind'] > 15:
-        breaking_intel.append({
-            'title': f"{weather_team} weather alert: {selected_weather['wind'
