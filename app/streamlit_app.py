@@ -1661,280 +1661,452 @@ with st.sidebar:
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.markdown("## Enhanced Strategic Analysis")
-    
-    # Strategic Consultation Interface
-    st.markdown("### Strategic Consultation")
-    
-    # Custom question input with proper visibility
-    col_input, col_send = st.columns([4, 1])
-    
-    with col_input:
-        custom_question = st.text_input(
-            "Ask your strategic question:",
-            placeholder="e.g., How should we attack their red zone defense?",
-            key="strategic_question_input",
-            help="Type your specific strategic question here"
-        )
-    
-    with col_send:
-        st.write("")  # Add spacing
-        analyze_custom = st.button("🧠 Analyze", type="primary", key="custom_analysis")
-    
-    # Formation selection interface
-    st.markdown("### Formation Analysis")
-    
-    col_form1, col_form2, col_form3 = st.columns(3)
-    
-    with col_form1:
-        selected_formation = st.selectbox(
-            "Select Formation:",
-            ["11_personnel", "12_personnel", "21_personnel", "10_personnel"],
-            format_func=lambda x: x.replace('_', ' ').title(),
-            key="formation_selector"
-        )
-    
-    with col_form2:
-        analysis_type = st.selectbox(
-            "Analysis Type:",
-            ["Usage Comparison", "Success Rate Analysis", "Situational Breakdown", "Personnel Matchups"],
-            key="analysis_type_selector"
-        )
-    
-    with col_form3:
-        st.write("")  # Add spacing
-        analyze_formation = st.button("📊 Analyze Formation", key="formation_analysis")
-    
-    # Quick analysis buttons
-    st.markdown("### Quick Strategic Analysis")
-    
-    col_btn1, col_btn2, col_btn3 = st.columns(3)
-    
-    with col_btn1:
-        if st.button("🎯 Tactical Edge Analysis", type="secondary", key="tactical_edge"):
+        # Strategic Consultation Interface
+        st.markdown("### Strategic Consultation")
+        
+        # Custom question input with proper visibility
+        col_input, col_send = st.columns([4, 1])
+        
+        with col_input:
+            custom_question = st.text_input(
+                "Ask your strategic question:",
+                placeholder="e.g., How should we attack their red zone defense?",
+                key="strategic_question_input",
+                help="Type your specific strategic question here"
+            )
+        
+        with col_send:
+            st.write("")  # Add spacing
+            analyze_custom = st.button("🧠 Analyze", type="primary", key="custom_analysis")
+        
+        # Formation selection interface
+        st.markdown("### Formation Analysis")
+        
+        col_form1, col_form2, col_form3 = st.columns(3)
+        
+        with col_form1:
+            selected_formation = st.selectbox(
+                "Select Formation:",
+                ["11_personnel", "12_personnel", "21_personnel", "10_personnel"],
+                format_func=lambda x: x.replace('_', ' ').title(),
+                key="formation_selector"
+            )
+        
+        with col_form2:
+            analysis_type = st.selectbox(
+                "Analysis Type:",
+                ["Usage Comparison", "Success Rate Analysis", "Situational Breakdown", "Personnel Matchups"],
+                key="analysis_type_selector"
+            )
+        
+        with col_form3:
+            st.write("")  # Add spacing
+            analyze_formation = st.button("📊 Analyze Formation", key="formation_analysis")
+        
+        # Quick analysis buttons
+        st.markdown("### Quick Strategic Analysis")
+        
+        col_btn1, col_btn2, col_btn3 = st.columns(3)
+        
+        with col_btn1:
+            if st.button("🎯 Tactical Edge Analysis", type="secondary", key="tactical_edge"):
+                try:
+                    strategic_data = get_nfl_strategic_data(selected_team1, selected_team2)
+                    weather_data = get_enhanced_weather_data(weather_team)
+                    
+                    question = f"Identify specific tactical advantages for {selected_team1} vs {selected_team2}"
+                    analysis = generate_enhanced_strategic_analysis(selected_team1, selected_team2, question, strategic_data, weather_data)
+                    
+                    st.success("✅ Tactical Analysis Complete")
+                    st.markdown(analysis)
+                    
+                    if show_formation_details:
+                        st.markdown("#### Formation Details")
+                        team1_data = strategic_data['team1_data']
+                        st.write(f"**{selected_team1} 11 Personnel:** {team1_data['formation_data']['11_personnel']['usage']*100:.1f}% usage, {team1_data['formation_data']['11_personnel']['ypp']:.1f} YPP")
+                    
+                except (WeatherAPIError, OpenAIAPIError, DataIntegrityError) as e:
+                    error_type = type(e).__name__.replace('Error', '').lower()
+                    show_user_notification(error_type, str(e))
+                except Exception as e:
+                    st.error(f"Unexpected error: {str(e)}")
+        
+        with col_btn2:
+            if st.button("🌦️ Weather Impact Analysis", key="weather_impact"):
+                try:
+                    weather_data = get_enhanced_weather_data(weather_team)
+                    
+                    st.success(f"✅ Weather analysis for {weather_team}")
+                    
+                    col_w1, col_w2 = st.columns(2)
+                    with col_w1:
+                        st.metric("Temperature", f"{weather_data['temp']}°F")
+                        st.metric("Wind Speed", f"{weather_data['wind']} mph")
+                    
+                    with col_w2:
+                        st.metric("Conditions", weather_data['condition'])
+                        stadium_info = weather_data.get('stadium_info', {})
+                        st.metric("Stadium", stadium_info.get('stadium', 'Unknown'))
+                    
+                    st.markdown("**Strategic Impact:**")
+                    for adjustment in weather_data['strategic_impact']['recommended_adjustments']:
+                        st.write(f"• {adjustment}")
+                    
+                except WeatherAPIError as e:
+                    show_user_notification("timeout", str(e))
+        
+        with col_btn3:
+            if st.button("📋 Situational Breakdown", key="situational_breakdown"):
+                try:
+                    strategic_data = get_nfl_strategic_data(selected_team1, selected_team2)
+                    
+                    st.success("✅ Situational analysis complete")
+                    
+                    team1_data = strategic_data['team1_data']
+                    team2_data = strategic_data['team2_data']
+                    
+                    st.markdown("#### Third Down Efficiency")
+                    col_s1, col_s2 = st.columns(2)
+                    
+                    with col_s1:
+                        st.metric(f"{selected_team1} Conversion Rate", f"{team1_data['situational_tendencies']['third_down_conversion']*100:.1f}%")
+                    
+                    with col_s2:
+                        st.metric(f"{selected_team2} Conversion Rate", f"{team2_data['situational_tendencies']['third_down_conversion']*100:.1f}%")
+                    
+                    st.markdown("#### Red Zone Performance")
+                    col_r1, col_r2 = st.columns(2)
+                    
+                    with col_r1:
+                        st.metric(f"{selected_team1} Efficiency", f"{team1_data['situational_tendencies']['red_zone_efficiency']*100:.1f}%")
+                    
+                    with col_r2:
+                        st.metric(f"{selected_team2} Efficiency", f"{team2_data['situational_tendencies']['red_zone_efficiency']*100:.1f}%")
+                    
+                except DataIntegrityError as e:
+                    show_user_notification("data_missing", str(e))
+        
+        # Handle custom question analysis
+        if analyze_custom and custom_question:
             try:
                 strategic_data = get_nfl_strategic_data(selected_team1, selected_team2)
                 weather_data = get_enhanced_weather_data(weather_team)
                 
-                question = f"Identify specific tactical advantages for {selected_team1} vs {selected_team2}"
-                analysis = generate_enhanced_strategic_analysis(selected_team1, selected_team2, question, strategic_data, weather_data)
+                analysis = generate_enhanced_strategic_analysis(selected_team1, selected_team2, custom_question, strategic_data, weather_data)
                 
-                st.success("✅ Tactical Analysis Complete")
+                st.success("✅ Strategic Consultation Complete")
+                st.markdown("#### Strategic Analysis Response:")
                 st.markdown(analysis)
-                
-                if show_formation_details:
-                    st.markdown("#### Formation Details")
-                    team1_data = strategic_data['team1_data']
-                    st.write(f"**{selected_team1} 11 Personnel:** {team1_data['formation_data']['11_personnel']['usage']*100:.1f}% usage, {team1_data['formation_data']['11_personnel']['ypp']:.1f} YPP")
                 
             except (WeatherAPIError, OpenAIAPIError, DataIntegrityError) as e:
                 error_type = type(e).__name__.replace('Error', '').lower()
                 show_user_notification(error_type, str(e))
             except Exception as e:
                 st.error(f"Unexpected error: {str(e)}")
-    
-    with col_btn2:
-        if st.button("🌦️ Weather Impact Analysis", key="weather_impact"):
-            try:
-                weather_data = get_enhanced_weather_data(weather_team)
-                
-                st.success(f"✅ Weather analysis for {weather_team}")
-                
-                col_w1, col_w2 = st.columns(2)
-                with col_w1:
-                    st.metric("Temperature", f"{weather_data['temp']}°F")
-                    st.metric("Wind Speed", f"{weather_data['wind']} mph")
-                
-                with col_w2:
-                    st.metric("Conditions", weather_data['condition'])
-                    stadium_info = weather_data.get('stadium_info', {})
-                    st.metric("Stadium", stadium_info.get('stadium', 'Unknown'))
-                
-                st.markdown("**Strategic Impact:**")
-                for adjustment in weather_data['strategic_impact']['recommended_adjustments']:
-                    st.write(f"• {adjustment}")
-                
-            except WeatherAPIError as e:
-                show_user_notification("timeout", str(e))
-    
-    with col_btn3:
-        if st.button("📋 Situational Breakdown", key="situational_breakdown"):
+        
+        elif analyze_custom and not custom_question:
+            st.warning("⚠️ Please enter a strategic question first")
+        
+        # Handle formation analysis
+        if analyze_formation:
             try:
                 strategic_data = get_nfl_strategic_data(selected_team1, selected_team2)
                 
-                st.success("✅ Situational analysis complete")
+                st.success(f"✅ {selected_formation.replace('_', ' ').title()} analysis complete")
                 
                 team1_data = strategic_data['team1_data']
                 team2_data = strategic_data['team2_data']
                 
-                st.markdown("#### Third Down Efficiency")
-                col_s1, col_s2 = st.columns(2)
+                # Check if formation exists for both teams
+                if selected_formation in team1_data['formation_data'] and selected_formation in team2_data['formation_data']:
+                    
+                    st.markdown(f"#### {selected_formation.replace('_', ' ').title()} - {analysis_type}")
+                    
+                    if analysis_type == "Usage Comparison":
+                        col_f1, col_f2, col_f3 = st.columns(3)
+                        
+                        data1 = team1_data['formation_data'][selected_formation]
+                        data2 = team2_data['formation_data'][selected_formation]
+                        
+                        with col_f1:
+                            st.metric(f"{selected_team1} Usage", f"{data1['usage']*100:.1f}%")
+                            st.metric(f"{selected_team1} YPP", f"{data1['ypp']:.1f}")
+                        
+                        with col_f2:
+                            st.metric(f"{selected_team2} Usage", f"{data2['usage']*100:.1f}%")
+                            st.metric(f"{selected_team2} YPP", f"{data2['ypp']:.1f}")
+                        
+                        with col_f3:
+                            usage_diff = (data1['usage'] - data2['usage']) * 100
+                            ypp_diff = data1['ypp'] - data2['ypp']
+                            st.metric("Usage Difference", f"{usage_diff:+.1f}%")
+                            st.metric("YPP Difference", f"{ypp_diff:+.1f}")
+                    
+                    elif analysis_type == "Success Rate Analysis":
+                        col_f1, col_f2 = st.columns(2)
+                        
+                        data1 = team1_data['formation_data'][selected_formation]
+                        data2 = team2_data['formation_data'][selected_formation]
+                        
+                        with col_f1:
+                            st.write(f"**{selected_team1}**")
+                            st.write(f"Success Rate: {data1['success_rate']*100:.1f}%")
+                            st.write(f"TD Rate: {data1.get('td_rate', 0)*100:.1f}%")
+                        
+                        with col_f2:
+                            st.write(f"**{selected_team2}**")
+                            st.write(f"Success Rate: {data2['success_rate']*100:.1f}%")
+                            st.write(f"TD Rate: {data2.get('td_rate', 0)*100:.1f}%")
+                    
+                    # Strategic recommendation
+                    st.markdown("#### Strategic Recommendation")
+                    if data1['ypp'] > data2['ypp']:
+                        advantage = data1['ypp'] - data2['ypp']
+                        st.info(f"💡 **{selected_team1}** has a {advantage:.1f} YPP advantage in {selected_formation.replace('_', ' ')} - exploit this formation heavily")
+                    else:
+                        advantage = data2['ypp'] - data1['ypp']
+                        st.warning(f"⚠️ **{selected_team2}** has a {advantage:.1f} YPP advantage in {selected_formation.replace('_', ' ')} - limit usage or adjust personnel")
                 
-                with col_s1:
-                    st.metric(f"{selected_team1} Conversion Rate", f"{team1_data['situational_tendencies']['third_down_conversion']*100:.1f}%")
-                
-                with col_s2:
-                    st.metric(f"{selected_team2} Conversion Rate", f"{team2_data['situational_tendencies']['third_down_conversion']*100:.1f}%")
-                
-                st.markdown("#### Red Zone Performance")
-                col_r1, col_r2 = st.columns(2)
-                
-                with col_r1:
-                    st.metric(f"{selected_team1} Efficiency", f"{team1_data['situational_tendencies']['red_zone_efficiency']*100:.1f}%")
-                
-                with col_r2:
-                    st.metric(f"{selected_team2} Efficiency", f"{team2_data['situational_tendencies']['red_zone_efficiency']*100:.1f}%")
-                
+                else:
+                    missing_teams = []
+                    if selected_formation not in team1_data['formation_data']:
+                        missing_teams.append(selected_team1)
+                    if selected_formation not in team2_data['formation_data']:
+                        missing_teams.append(selected_team2)
+                    
+                    st.warning(f"⚠️ {selected_formation.replace('_', ' ').title()} data not available for: {', '.join(missing_teams)}")
+                    
             except DataIntegrityError as e:
                 show_user_notification("data_missing", str(e))
-    
-    # Handle custom question analysis
-    if analyze_custom and custom_question:
+
+    with col2:
+        st.markdown("## Quick Team Overview")
+        
+        # Team data summary
+        st.markdown("### Selected Matchup")
+        st.info(f"**Analyzing:** {selected_team1} vs {selected_team2}")
+        
         try:
-            strategic_data = get_nfl_strategic_data(selected_team1, selected_team2)
-            weather_data = get_enhanced_weather_data(weather_team)
-            
-            analysis = generate_enhanced_strategic_analysis(selected_team1, selected_team2, custom_question, strategic_data, weather_data)
-            
-            st.success("✅ Strategic Consultation Complete")
-            st.markdown("#### Strategic Analysis Response:")
-            st.markdown(analysis)
-            
-        except (WeatherAPIError, OpenAIAPIError, DataIntegrityError) as e:
-            error_type = type(e).__name__.replace('Error', '').lower()
-            show_user_notification(error_type, str(e))
-        except Exception as e:
-            st.error(f"Unexpected error: {str(e)}")
-    
-    elif analyze_custom and not custom_question:
-        st.warning("⚠️ Please enter a strategic question first")
-    
-    # Handle formation analysis
-    if analyze_formation:
-        try:
-            strategic_data = get_nfl_strategic_data(selected_team1, selected_team2)
-            
-            st.success(f"✅ {selected_formation.replace('_', ' ').title()} analysis complete")
-            
-            team1_data = strategic_data['team1_data']
-            team2_data = strategic_data['team2_data']
-            
-            # Check if formation exists for both teams
-            if selected_formation in team1_data['formation_data'] and selected_formation in team2_data['formation_data']:
-                
-                st.markdown(f"#### {selected_formation.replace('_', ' ').title()} - {analysis_type}")
-                
-                if analysis_type == "Usage Comparison":
-                    col_f1, col_f2, col_f3 = st.columns(3)
-                    
-                    data1 = team1_data['formation_data'][selected_formation]
-                    data2 = team2_data['formation_data'][selected_formation]
-                    
-                    with col_f1:
-                        st.metric(f"{selected_team1} Usage", f"{data1['usage']*100:.1f}%")
-                        st.metric(f"{selected_team1} YPP", f"{data1['ypp']:.1f}")
-                    
-                    with col_f2:
-                        st.metric(f"{selected_team2} Usage", f"{data2['usage']*100:.1f}%")
-                        st.metric(f"{selected_team2} YPP", f"{data2['ypp']:.1f}")
-                    
-                    with col_f3:
-                        usage_diff = (data1['usage'] - data2['usage']) * 100
-                        ypp_diff = data1['ypp'] - data2['ypp']
-                        st.metric("Usage Difference", f"{usage_diff:+.1f}%")
-                        st.metric("YPP Difference", f"{ypp_diff:+.1f}")
-                
-                elif analysis_type == "Success Rate Analysis":
-                    col_f1, col_f2 = st.columns(2)
-                    
-                    data1 = team1_data['formation_data'][selected_formation]
-                    data2 = team2_data['formation_data'][selected_formation]
-                    
-                    with col_f1:
-                        st.write(f"**{selected_team1}**")
-                        st.write(f"Success Rate: {data1['success_rate']*100:.1f}%")
-                        st.write(f"TD Rate: {data1.get('td_rate', 0)*100:.1f}%")
-                    
-                    with col_f2:
-                        st.write(f"**{selected_team2}**")
-                        st.write(f"Success Rate: {data2['success_rate']*100:.1f}%")
-                        st.write(f"TD Rate: {data2.get('td_rate', 0)*100:.1f}%")
-                
-                # Strategic recommendation
-                st.markdown("#### Strategic Recommendation")
-                if data1['ypp'] > data2['ypp']:
-                    advantage = data1['ypp'] - data2['ypp']
-                    st.info(f"💡 **{selected_team1}** has a {advantage:.1f} YPP advantage in {selected_formation.replace('_', ' ')} - exploit this formation heavily")
-                else:
-                    advantage = data2['ypp'] - data1['ypp']
-                    st.warning(f"⚠️ **{selected_team2}** has a {advantage:.1f} YPP advantage in {selected_formation.replace('_', ' ')} - limit usage or adjust personnel")
-            
+            if selected_team1 in NFL_STRATEGIC_DATA and selected_team2 in NFL_STRATEGIC_DATA:
+                st.success("✅ Complete strategic data available")
             else:
-                missing_teams = []
-                if selected_formation not in team1_data['formation_data']:
-                    missing_teams.append(selected_team1)
-                if selected_formation not in team2_data['formation_data']:
-                    missing_teams.append(selected_team2)
-                
-                st.warning(f"⚠️ {selected_formation.replace('_', ' ').title()} data not available for: {', '.join(missing_teams)}")
-                
-        except DataIntegrityError as e:
-            show_user_notification("data_missing", str(e))
+                st.error("❌ Missing strategic data")
+        except:
+            st.warning("⚠️ Data loading...")
+        
+        # Weather status
+        st.markdown("### Weather Intelligence")
+        try:
+            weather_team_info = NFL_STADIUM_LOCATIONS.get(weather_team, {})
+            if weather_team_info:
+                st.write(f"**Stadium:** {weather_team_info.get('stadium', 'Unknown')}")
+                st.write(f"**Location:** {weather_team_info.get('city', 'Unknown')}, {weather_team_info.get('state', 'Unknown')}")
+                st.write(f"**Type:** {'Dome' if weather_team_info.get('dome') else 'Outdoor'}")
+                st.write(f"**Elevation:** {weather_team_info.get('elevation', 0)} ft")
+        except:
+            st.warning("⚠️ Weather data loading...")
+        
+        # Quick stats
+        try:
+            if selected_team1 in NFL_STRATEGIC_DATA:
+                team_data = NFL_STRATEGIC_DATA[selected_team1]
+                st.markdown(f"### {selected_team1} Quick Stats")
+                st.write(f"Third Down: {team_data['situational_tendencies']['third_down_conversion']*100:.1f}%")
+                st.write(f"Red Zone: {team_data['situational_tendencies']['red_zone_efficiency']*100:.1f}%")
+                st.write(f"Motion Usage: {team_data['coaching_tendencies']['motion_usage']*100:.0f}%")
+        except:
+            st.warning("⚠️ Team stats loading...")
 
-with col2:
-    st.markdown("## Phase 3 Data Status")
-    
-    # Team data summary
-    st.markdown("### Selected Teams")
-    st.info(f"**Analyzing:** {selected_team1} vs {selected_team2}")
-    
-    if selected_team1 in NFL_STRATEGIC_DATA and selected_team2 in NFL_STRATEGIC_DATA:
-        st.success("✅ Complete strategic data available")
-    else:
-        st.error("❌ Missing strategic data")
-    
-    # Weather status
-    st.markdown("### Weather Intelligence")
-    weather_team_info = NFL_STADIUM_LOCATIONS.get(weather_team, {})
-    if weather_team_info:
-        st.write(f"**Stadium:** {weather_team_info.get('stadium', 'Unknown')}")
-        st.write(f"**Location:** {weather_team_info.get('city', 'Unknown')}, {weather_team_info.get('state', 'Unknown')}")
-        st.write(f"**Type:** {'Dome' if weather_team_info.get('dome') else 'Outdoor'}")
-        st.write(f"**Elevation:** {weather_team_info.get('elevation', 0)} ft")
-    
-    # Quick stats
-    if selected_team1 in NFL_STRATEGIC_DATA:
-        team_data = NFL_STRATEGIC_DATA[selected_team1]
-        st.markdown(f"### {selected_team1} Quick Stats")
-        st.write(f"Third Down: {team_data['situational_tendencies']['third_down_conversion']*100:.1f}%")
-        st.write(f"Red Zone: {team_data['situational_tendencies']['red_zone_efficiency']*100:.1f}%")
-        st.write(f"Motion Usage: {team_data['coaching_tendencies']['motion_usage']*100:.0f}%")
+# =============================================================================
+# TAB 2: DATA DASHBOARD
+# =============================================================================
 
-# Phase 3 completion status
+with tab2:
+    st.markdown("## 📊 Data Integrity Dashboard")
+    
+    # Overall system health
+    col1, col2, col3, col4 = st.columns(4)
+    
+    try:
+        with col1:
+            team_completeness = len(NFL_STRATEGIC_DATA) / 32
+            st.metric("Team Data", f"{len(NFL_STRATEGIC_DATA)}/32", f"{team_completeness:.1%}")
+        
+        with col2:
+            stadium_completeness = len(NFL_STADIUM_LOCATIONS) / 32
+            st.metric("Stadium Data", f"{len(NFL_STADIUM_LOCATIONS)}/32", f"{stadium_completeness:.1%}")
+        
+        with col3:
+            historical_games = len(get_historical_games_database().get('week_1_2024', []))
+            st.metric("Historical Games", historical_games, "Sample Data")
+        
+        with col4:
+            player_data = len(get_player_performance_database().get('quarterbacks', {}))
+            st.metric("Player Profiles", player_data, "QB Focus")
+    except Exception as e:
+        st.error(f"Error loading dashboard metrics: {str(e)}")
+    
+    # Phase 3 validation status
+    st.markdown("### Phase 3 Data Validation")
+    try:
+        validation_results = validate_phase3_data()
+        for result in validation_results:
+            st.write(result)
+        
+        if all("✅" in result for result in validation_results):
+            st.success("✅ Phase 3 Data Integrity: COMPLETE")
+        else:
+            st.warning("⚠️ Phase 3 Data Integrity: Validation Issues Detected")
+    except Exception as e:
+        st.error(f"Error running validation: {str(e)}")
+    
+    # Detailed data health
+    st.markdown("### Dataset Health Status")
+    
+    # Mock data health for demonstration
+    datasets = [
+        {'name': 'Team Strategic Data', 'status': 'Complete', 'completeness': 1.0, 'records': 32},
+        {'name': 'Stadium Information', 'status': 'Complete', 'completeness': 1.0, 'records': 32},
+        {'name': 'Weather Integration', 'status': 'Operational', 'completeness': 0.95, 'records': 'Live'},
+        {'name': 'Historical Games', 'status': 'Partial', 'completeness': 0.15, 'records': 2},
+        {'name': 'Player Performance', 'status': 'Partial', 'completeness': 0.25, 'records': 3},
+        {'name': 'Injury Reports', 'status': 'Missing', 'completeness': 0.0, 'records': 0}
+    ]
+    
+    for dataset in datasets:
+        col1, col2, col3, col4 = st.columns([3, 2, 2, 2])
+        
+        with col1:
+            st.write(dataset['name'])
+        
+        with col2:
+            if dataset['status'] == 'Complete':
+                st.success(dataset['status'])
+            elif dataset['status'] == 'Operational':
+                st.success(dataset['status'])
+            elif dataset['status'] == 'Partial':
+                st.warning(dataset['status'])
+            else:
+                st.error(dataset['status'])
+        
+        with col3:
+            st.progress(dataset['completeness'])
+            st.caption(f"{dataset['completeness']:.1%}")
+        
+        with col4:
+            st.write(str(dataset['records']))
+
+# =============================================================================
+# TAB 3: SYSTEM HEALTH
+# =============================================================================
+
+with tab3:
+    st.markdown("## 🔧 System Health Monitoring")
+    
+    # Service health dashboard
+    try:
+        st.markdown("### API Service Status")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            openai_health = service_monitor.get_service_status("OpenAI")
+            
+            if openai_health.status == ServiceStatus.OPERATIONAL:
+                st.success(f"✅ OpenAI API: {openai_health.message}")
+                if openai_health.response_time:
+                    st.caption(f"Response time: {openai_health.response_time:.2f}s")
+            elif openai_health.status == ServiceStatus.DEGRADED:
+                st.warning(f"⚠️ OpenAI API: {openai_health.message}")
+                st.caption("Strategic analysis may be slower than usual")
+            else:
+                st.error(f"❌ OpenAI API: {openai_health.message}")
+                st.caption("Strategic analysis unavailable")
+        
+        with col2:
+            weather_health = service_monitor.get_service_status("Weather API")
+            
+            if weather_health.status == ServiceStatus.OPERATIONAL:
+                st.success(f"✅ Weather API: {weather_health.message}")
+                if weather_health.response_time:
+                    st.caption(f"Response time: {weather_health.response_time:.2f}s")
+            elif weather_health.status == ServiceStatus.DEGRADED:
+                st.warning(f"⚠️ Weather API: {weather_health.message}")
+                st.caption("Weather data may be delayed")
+            else:
+                st.error(f"❌ Weather API: {weather_health.message}")
+                st.caption("Using fallback weather data")
+        
+        st.caption(f"Last updated: {max(openai_health.last_checked, weather_health.last_checked).strftime('%H:%M:%S')}")
+        
+        if st.button("🔄 Refresh Service Status", key="refresh_services"):
+            service_monitor.update_service_status("OpenAI")
+            service_monitor.update_service_status("Weather API")
+            st.success("🔄 All services refreshed")
+            st.rerun()
+    
+    except Exception as e:
+        st.error(f"Error checking service health: {str(e)}")
+    
+    # System testing
+    st.markdown("### System Testing")
+    
+    col_test1, col_test2 = st.columns(2)
+    
+    with col_test1:
+        if st.button("🧪 Test Weather API", key="test_weather"):
+            try:
+                weather_data = get_enhanced_weather_data(weather_team)
+                st.success(f"✅ Weather API: {weather_data['temp']}°F, {weather_data['condition']}")
+            except WeatherAPIError as e:
+                show_user_notification("timeout", str(e))
+            except Exception as e:
+                st.error(f"Weather test failed: {str(e)}")
+    
+    with col_test2:
+        if st.button("🧪 Test OpenAI API", key="test_openai"):
+            try:
+                # Simple test
+                test_data = {'team1_data': {}, 'team2_data': {}}
+                test_weather = {'temp': 70, 'wind': 5, 'condition': 'Clear', 'strategic_impact': {'recommended_adjustments': ['Test condition']}}
+                analysis = generate_enhanced_strategic_analysis("Test Team 1", "Test Team 2", "Test question", test_data, test_weather)
+                st.success("✅ OpenAI API responding normally")
+            except OpenAIAPIError as e:
+                if "rate_limit" in str(e).lower():
+                    show_user_notification("rate_limit", str(e))
+                else:
+                    show_user_notification("api_key", str(e))
+            except Exception as e:
+                st.error(f"OpenAI test failed: {str(e)}")
+
+# =============================================================================
+# TAB 4: SETTINGS
+# =============================================================================
+
+with tab4:
+    st.markdown("## ⚙️ Settings & Configuration")
+    
+    st.markdown("### Notification Preferences")
+    st.session_state['service_notifications_enabled'] = st.checkbox(
+        "Enable Service Notifications", 
+        value=st.session_state.get('service_notifications_enabled', True),
+        help="Show service health notifications and warnings"
+    )
+    
+    st.markdown("### Analysis Options")
+    default_formation_details = st.checkbox("Show Formation Details by Default", value=True)
+    default_weather_analysis = st.checkbox("Include Weather Analysis by Default", value=True)
+    
+    st.markdown("### Data Sources")
+    st.write("**Strategic Data:** Internal Phase 3 Database (32/32 teams)")
+    st.write("**Weather Data:** OpenWeatherMap API + Fallback System")
+    st.write("**AI Analysis:** OpenAI GPT-3.5 Turbo + Comprehensive Fallbacks")
+    
+    st.markdown("### System Information")
+    st.write("**Version:** GRIT v3.5 - Phase 3 Data Integrity")
+    st.write("**Phase 1:** ✅ Fail Fast Architecture")
+    st.write("**Phase 2:** ✅ Error Handling & Monitoring")
+    st.write("**Phase 3:** ✅ Complete Data Integrity")
+
+# Phase 3 completion status footer
 st.markdown("---")
-col_status1, col_status2, col_status3 = st.columns(3)
-
-with col_status1:
-    st.info("**Phase 1:** ✅ Fail Fast Architecture - Complete")
-
-with col_status2:
-    st.info("**Phase 2:** ✅ Error Handling & Monitoring - Complete")
-
-with col_status3:
-    st.success("**Phase 3:** ✅ Data Integrity & Complete Database - ACTIVE")
-
-st.markdown("""
-**Phase 3 Complete Features:**
-- ✅ Complete strategic data for all 32 NFL teams
-- ✅ Enhanced stadium and weather intelligence  
-- ✅ Formation analysis with success rates and usage patterns
-- ✅ Personnel advantage calculations and coaching tendencies
-- ✅ Data validation and health monitoring systems
-- ✅ Comprehensive error handling with user guidance
-- ⚠️ Historical game database (sample data)
-- ⚠️ Player performance tracking (development)
-""")
-
-# Footer
-st.markdown("---")
-st.caption("GRIT v3.5 - Professional NFL Strategic Analysis Platform | Phase 3: Data Integrity Complete")
