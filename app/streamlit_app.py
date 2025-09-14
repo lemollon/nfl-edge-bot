@@ -925,9 +925,8 @@ with tab_analysis:
         except Exception as e:
             st.warning(f"Chat history unavailable: {str(e)}")
         
-        # Chat input
-        if coach_q := st.chat_input("Continue the strategic discussion...",
-                                   help="💬 Ask follow-up questions or dive deeper into specific aspects of the analysis. The AI maintains context from your previous questions in this session."):
+        # Chat input - BUG FIX: Line 929 - Removed help parameter (not supported by st.chat_input)
+        if coach_q := st.chat_input("Continue the strategic discussion..."):
             with st.chat_message("user"):
                 st.markdown(coach_q)
             
