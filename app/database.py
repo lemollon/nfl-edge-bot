@@ -473,5 +473,25 @@ def get_recent_chat_history(session_id: str, limit: int = 10) -> List[Tuple[str,
 # INITIALIZATION CALL
 # =============================================================================
 
-# Initialize database and populate teams on module import
-populate_teams_database()
+# Instead, add this function to be called explicitly:
+def ensure_database_populated():
+    """
+    Ensures the database is populated with team data.
+    Call this explicitly from main.py instead of at module level.
+    """
+    try:
+        conn = init_database()
+        cursor = conn.cursor()
+        
+        # Check if teams table has data
+        cursor.execute("SELECT COUNT(*) FROM teams")
+        count = cursor.fetchone()[0]
+        
+        if count == 0:
+            populate_teams_database()
+            
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Database population check failed: {e}")
+        return False
