@@ -914,6 +914,30 @@ with col_info3:
     analysis_count = 1 if st.session_state.last_analysis else 0
     st.metric("📊 Analyses Generated", analysis_count, "This Session")
 
+# =============================================================================
+# FOOTER AND DATABASE STATUS
+# =============================================================================
+
+st.markdown("---")
+
+# System information
+col_info1, col_info2, col_info3 = st.columns(3)
+
+with col_info1:
+    try:
+        team_count = len(get_all_team_names())
+        st.metric("🏈 NFL Teams", team_count, "Database Active")
+    except:
+        st.metric("🏈 NFL Teams", "Error", "Database Issue")
+
+with col_info2:
+    weather_status = "Active" if st.session_state.current_weather_data else "Standby"
+    st.metric("🌦️ Weather Intelligence", weather_status, "Live Updates")
+
+with col_info3:
+    analysis_count = 1 if st.session_state.last_analysis else 0
+    st.metric("📊 Analyses Generated", analysis_count, "This Session")
+
 # Footer
 st.markdown("""
 <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
@@ -926,25 +950,4 @@ st.markdown("""
         Think Like Belichick • Call Plays Like Reid • Analyze Like a Pro
     </p>
 </div>
-""", unsafe_allow_html=True)(alert)
-        
-        # Formation advantage indicator
-        try:
-            teams = st.session_state.selected_teams
-            if teams['team1'] and teams['team2']:
-                team1_data = get_team_data(teams['team1'])
-                team2_data = get_team_data(teams['team2'])
-                
-                if team1_data and team2_data:
-                    team1_ypp = team1_data.get('formation_data', {}).get('11_personnel', {}).get('ypp', 0)
-                    team2_ypp = team2_data.get('formation_data', {}).get('11_personnel', {}).get('ypp', 0)
-                    
-                    st.markdown("#### Formation Efficiency")
-                    if team1_ypp > team2_ypp:
-                        advantage = team1_ypp - team2_ypp
-                        st.success(f"✅ {teams['team1']}\n+{advantage:.1f} YPP advantage")
-                    else:
-                        advantage = team2_ypp - team1_ypp
-                        st.warning(f"⚠️ {teams['team2']}\n+{advantage:.1f} YPP advantage")
-        except Exception as e:
-            st.warning
+""", unsafe_allow_html=True)
