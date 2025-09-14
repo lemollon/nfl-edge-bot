@@ -24,7 +24,7 @@ from typing import Dict, List, Optional
 # Import custom modules
 from database import (
     init_database, get_team_data, get_all_team_names, 
-    save_chat_message, get_recent_chat_history
+    save_chat_message, get_recent_chat_history, ensure_database_populated
 )
 from weather import get_comprehensive_weather_data, get_weather_summary, get_weather_alerts
 from analysis import (
@@ -199,6 +199,17 @@ def initialize_session_state():
     if 'session_id' not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())
     
+    # Initialize database if needed (only once per session)
+    if 'database_initialized' not in st.session_state:
+        try:
+            if ensure_database_populated():
+                st.session_state.database_initialized = True
+            else:
+                st.session_state.database_initialized = False
+        except Exception as e:
+            st.session_state.database_initialized = False
+            st.error(f"Database initialization failed: {e}")
+    
     default_values = {
         'selected_teams': {'team1': None, 'team2': None, 'weather_team': None},
         'game_situation': {
@@ -217,9 +228,6 @@ def initialize_session_state():
     for key, default_value in default_values.items():
         if key not in st.session_state:
             st.session_state[key] = default_value
-
-initialize_session_state()
-
 # =============================================================================
 # MAIN APPLICATION HEADER
 # =============================================================================
