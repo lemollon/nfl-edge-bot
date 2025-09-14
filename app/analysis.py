@@ -165,17 +165,18 @@ def validate_and_extract_team_data(team_data: Dict, team_name: str) -> Tuple[boo
 def call_gpt_analysis(prompt: str, max_tokens: int = 1500, temperature: float = 0.7) -> str:
     """
     Make real GPT-3.5 Turbo API call for strategic analysis
-    BUG FIX: Line 189 - Real OpenAI integration, no demo modes
+    BUG FIX: Line 189 - Real OpenAI integration with updated v1.x library
     """
     try:
         log_analysis_debug("call_gpt_analysis", 153, f"Making GPT-3.5 Turbo API call (tokens: {max_tokens})")
         
-        # Initialize OpenAI if needed
-        if not initialize_openai():
+        # Initialize OpenAI client
+        client = initialize_openai()
+        if not client:
             raise Exception("Failed to initialize OpenAI client - check API key in secrets")
         
-        # Make real GPT-3.5 Turbo API call
-        response = openai.ChatCompletion.create(
+        # Make real GPT-3.5 Turbo API call with new v1.x syntax
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -214,21 +215,22 @@ Provide specific, actionable insights using the provided data. Be direct, strate
         
         return analysis
         
-    except openai.error.RateLimitError as e:
-        log_analysis_debug("call_gpt_analysis", 196, "OpenAI rate limit exceeded", e)
-        return "Analysis temporarily unavailable due to high demand. Please try again in a moment."
-        
-    except openai.error.AuthenticationError as e:
-        log_analysis_debug("call_gpt_analysis", 200, "OpenAI authentication failed", e)
-        return "Analysis unavailable: API authentication error. Please check system configuration."
-        
-    except openai.error.APIError as e:
-        log_analysis_debug("call_gpt_analysis", 204, "OpenAI API error", e)
-        return "Analysis temporarily unavailable due to service error. Please try again."
-        
     except Exception as e:
-        log_analysis_debug("call_gpt_analysis", 208, "Unexpected error in GPT analysis", e)
-        return f"Analysis system error: {str(e)}"
+        # Handle different types of OpenAI errors with the new library
+        error_message = str(e).lower()
+        
+        if "rate" in error_message or "limit" in error_message:
+            log_analysis_debug("call_gpt_analysis", 201, "OpenAI rate limit exceeded", e)
+            return "Analysis temporarily unavailable due to high demand. Please try again in a moment."
+        elif "auth" in error_message or "api_key" in error_message:
+            log_analysis_debug("call_gpt_analysis", 204, "OpenAI authentication failed", e)
+            return "Analysis unavailable: API authentication error. Please check system configuration."
+        elif "api" in error_message or "service" in error_message:
+            log_analysis_debug("call_gpt_analysis", 207, "OpenAI API error", e)
+            return "Analysis temporarily unavailable due to service error. Please try again."
+        else:
+            log_analysis_debug("call_gpt_analysis", 210, "Unexpected error in GPT analysis", e)
+            return f"Analysis system error: {str(e)}"
 
 # =============================================================================
 # RICH PROMPT ENGINEERING - BUG FIX: Line 245
