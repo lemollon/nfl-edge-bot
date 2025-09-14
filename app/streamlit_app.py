@@ -55,6 +55,7 @@ st.set_page_config(
 )
 
 # Enhanced dark theme CSS with white text
+# Enhanced dark theme CSS with white text - REPLACE LINES 42-165
 st.markdown("""
 <style>
     /* CRITICAL STYLING PRINCIPLES */
@@ -65,7 +66,90 @@ st.markdown("""
     /* Dark theme base */
     .stApp {
         background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
-        color: #ffffff;
+        color: #ffffff !important;
+    }
+    
+    /* SIDEBAR STYLING - FORCE BLACK BACKGROUND */
+    .css-1d391kg, .css-1cypcdb, .css-17lntkn, section[data-testid="stSidebar"] {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+    
+    .css-1d391kg .css-1cypcdb {
+        background: #000000 !important;
+    }
+    
+    /* Sidebar content wrapper */
+    .css-1cypcdb > div {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+    
+    /* DROPDOWN SELECTORS - FORCE BLACK BACKGROUND WITH WHITE TEXT */
+    .stSelectbox > div > div {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border: 1px solid #333333 !important;
+    }
+    
+    .stSelectbox > div > div > select {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border: 1px solid #333333 !important;
+    }
+    
+    /* Dropdown options */
+    .stSelectbox > div > div > div {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Select dropdown arrow and container */
+    .css-1wa3eu0-placeholder, .css-12jo7m5, .css-1uccc91-singleValue {
+        color: #ffffff !important;
+    }
+    
+    /* React Select components */
+    .css-26l3qy-menu {
+        background: #000000 !important;
+        border: 1px solid #333333 !important;
+    }
+    
+    .css-1n7v3ny-option {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+    
+    .css-1n7v3ny-option:hover {
+        background: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+    
+    /* Input fields - FORCE BLACK BACKGROUND */
+    .stTextInput > div > div > input {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border: 1px solid #333333 !important;
+        border-radius: 8px;
+    }
+    
+    .stTextInput > div > div > input::placeholder {
+        color: #cccccc !important;
+    }
+    
+    /* Sliders */
+    .stSlider > div > div {
+        background: #000000 !important;
+    }
+    
+    .stSlider > div > div > div {
+        color: #ffffff !important;
+    }
+    
+    /* Radio buttons */
+    .stRadio > div {
+        background: #000000 !important;
+        color: #ffffff !important;
     }
     
     /* Main content area */
@@ -75,6 +159,18 @@ st.markdown("""
         border-radius: 15px;
         margin: 1rem;
         border: 1px solid #333;
+    }
+    
+    /* HEADER/TOP BAR STYLING */
+    header[data-testid="stHeader"] {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Top navigation */
+    .css-18ni7ap, .css-hby737, .css-17ziqus {
+        background: #000000 !important;
+        color: #ffffff !important;
     }
     
     /* Tabs styling with green gradients */
@@ -153,20 +249,6 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Input fields with white text */
-    .stTextInput > div > div > input {
-        background: #1a1a1a;
-        color: #ffffff !important;
-        border: 1px solid #333;
-        border-radius: 8px;
-    }
-    
-    .stSelectbox > div > div > select {
-        background: #1a1a1a;
-        color: #ffffff !important;
-        border: 1px solid #333;
-    }
-    
     /* Chat messages with white text */
     .stChatMessage {
         background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
@@ -176,14 +258,70 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Sidebar styling */
-    .css-1d391kg {
-        background: linear-gradient(180deg, #1a1a1a 0%, #262626 100%);
+    /* FORCE ALL TEXT TO BE WHITE */
+    .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span,
+    h1, h2, h3, h4, h5, h6, p, div, span, label {
         color: #ffffff !important;
     }
     
-    /* Ensure all text is white */
-    .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, span {
+    /* Sidebar specific text */
+    .css-1d391kg .stMarkdown, .css-1d391kg p, .css-1d391kg div, 
+    .css-1d391kg span, .css-1d391kg label {
+        color: #ffffff !important;
+    }
+    
+    /* Widget labels in sidebar */
+    .css-1d391kg .css-1cpxqw2 {
+        color: #ffffff !important;
+    }
+    
+    /* Select box labels */
+    .css-1d391kg .css-1adrz8d {
+        color: #ffffff !important;
+    }
+    
+    /* Help text */
+    .css-1d391kg .css-10trblm {
+        color: #cccccc !important;
+    }
+    
+    /* ADDITIONAL SELECTOR TARGETING */
+    /* Target all possible dropdown variations */
+    [data-baseweb="select"] {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+    
+    [data-baseweb="select"] > div {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border: 1px solid #333333 !important;
+    }
+    
+    /* Menu popover */
+    [data-baseweb="popover"] {
+        background: #000000 !important;
+    }
+    
+    [data-baseweb="menu"] {
+        background: #000000 !important;
+        border: 1px solid #333333 !important;
+    }
+    
+    /* Menu options */
+    [role="option"] {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+    
+    [role="option"]:hover {
+        background: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+    
+    /* Streamlit specific classes that might override */
+    .css-1v3fvcr, .css-1inwz65, .css-1d391kg {
+        background: #000000 !important;
         color: #ffffff !important;
     }
 </style>
