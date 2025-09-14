@@ -17,7 +17,7 @@ from typing import Dict, List, Tuple, Optional
 # DATABASE INITIALIZATION AND SCHEMA
 # =============================================================================
 
-@st.cache_data
+@st.cache_resource
 def init_database():
     """
     PURPOSE: Initialize SQLite database with complete NFL team data
