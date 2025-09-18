@@ -1,35 +1,21 @@
-# GRIT NFL PLATFORM v4.0 - PYTHON DEPENDENCIES
-# ==============================================
-# Core Streamlit and web framework libraries
+# --- Core ---
+streamlit==1.37.1
+pandas==2.2.2
+requests==2.32.3
 
-streamlit==1.36.0
-flask==2.3.3
-flask-cors==4.0.0
-gunicorn==21.2.0
+# --- Exports (DOCX) ---
+python-docx==1.1.2
 
-# Data processing and analysis libraries
-pandas>=1.5.0
-numpy>=1.24.0
+# --- Maps ---
+folium==0.16.0
+streamlit-folium==0.20.0
 
-# API and networking libraries
-requests==2.31.0
+# --- Free intel sources ---
+praw==7.7.1
+pytrends==4.9.2
 
-# AI and machine learning libraries
-openai>=1.0.0
-huggingface-hub==0.24.6
-rank-bm25==0.2.2
+# --- AI (copy, summaries) ---
+openai==1.52.0
 
-# Visualization libraries
-plotly>=5.15.0
-
-# Document processing and reporting libraries
-reportlab==4.2.2
-feedparser==6.0.11
-
-# Image processing libraries
-pillow==10.4.0
-
-# Configuration and environment libraries
-python-dotenv==1.0.1
-
-# Note: sqlite3, datetime, json, uuid are part of Python standard library
+# --- Visualization (optional) ---
+altair==5.3.0
